@@ -1,0 +1,143 @@
+SESSION CONTEXT SUMMARY - D SAJAWAT PORTFOLIO
+===============================================
+
+DATE: 2026-09-09
+
+PROJECT OVERVIEW
+----------------
+- React 18 + TypeScript + Tailwind CSS (Create React App)
+- Portfolio for "D SAJAWAT" - premium wedding/event fabrics from Ludhiana, Punjab
+- Key files: src/types.ts (data), src/components/ (UI), src/pages/ (routes)
+
+WHAT WAS COMPLETED IN THIS SESSION
+----------------------------------
+
+1. BACKEND PHASE 1 - INQUIRY API (Complete)
+   - Created api/inquiries/create.ts (POST handler)
+   - Supabase integration for database inserts
+   - Resend email integration (admin notification + customer confirmation)
+   - Zod validation for request body
+   - In-memory rate limiting (10 req/hr/IP)
+   - WhatsApp fallback already wired in frontend hook
+
+2. BACKEND PHASE 2 - CORE APIs (Complete)
+   - Products API (public + admin CRUD)
+     * api/products/list.ts - Public featured/all products
+     * api/products/get.ts - Single product by slug
+     * api/products/admin/list.ts - Admin paginated with filters
+     * api/products/admin/create.ts - Admin create product
+     * api/products/admin/update.ts - Admin update product
+     * api/products/admin/delete.ts - Admin delete product
+   - Swatch Request API
+     * api/swatch/create.ts - Public swatch kit request
+     * api/swatch/list.ts - Admin list with inquiry join
+   - Auth API
+     * api/auth/login.ts - Magic link email login
+     * api/auth/verify.ts - Magic link callback
+     * api/auth/password.ts - Simple password fallback
+   - Admin Inquiry API
+     * api/inquiries/admin/list.ts - Paginated with filters
+     * api/inquiries/admin/get.ts - Single inquiry + swatch requests
+     * api/inquiries/admin/update.ts - Status/notes + status email
+     * api/inquiries/admin/stats.ts - Dashboard stats
+
+3. UTILITY MODULES (Complete)
+   - api/utils/supabase.ts - Server-side Supabase client
+   - api/utils/validation.ts - Zod schemas (inquiry, swatch)
+   - api/utils/product-validation.ts - Zod schemas (product CRUD)
+   - api/utils/email.ts - 4 Resend templates (admin notify, customer confirm, status update, swatch confirm)
+   - api/utils/rate-limit.ts - In-memory rate limiter
+   - api/utils/auth.ts - JWT verification middleware
+
+4. FRONTEND INTEGRATION (Complete)
+   - src/hooks/useProducts.ts - Fetch products from API with fallback to types.ts
+   - src/hooks/useAdmin.ts - Admin auth, inquiries, products, swatches, stats hooks
+   - src/components/Collections.tsx - Updated to use useProducts hook (API-first, fallback to hardcoded)
+
+5. CONFIGURATION FILES (Complete)
+   - .env.local - Environment variables template
+   - supabase-schema.sql - Complete SQL schema (4 tables, RLS policies, indexes, triggers)
+   - vercel.json - Already configured for API routes
+   - package.json - Added @supabase/supabase-js, resend, zod
+
+FILES CREATED/MODIFIED
+----------------------
+| File | Status |
+|------|--------|
+| api/inquiries/create.ts | CREATED - Phase 1 endpoint |
+| api/products/list.ts | CREATED |
+| api/products/get.ts | CREATED |
+| api/products/admin/list.ts | CREATED |
+| api/products/admin/create.ts | CREATED |
+| api/products/admin/update.ts | CREATED |
+| api/products/admin/delete.ts | CREATED |
+| api/swatch/create.ts | CREATED |
+| api/swatch/list.ts | CREATED |
+| api/auth/login.ts | CREATED |
+| api/auth/verify.ts | CREATED |
+| api/auth/password.ts | CREATED |
+| api/inquiries/admin/list.ts | CREATED |
+| api/inquiries/admin/get.ts | CREATED |
+| api/inquiries/admin/update.ts | CREATED |
+| api/inquiries/admin/stats.ts | CREATED |
+| api/utils/supabase.ts | CREATED |
+| api/utils/validation.ts | CREATED |
+| api/utils/product-validation.ts | CREATED |
+| api/utils/email.ts | CREATED |
+| api/utils/rate-limit.ts | CREATED |
+| api/utils/auth.ts | CREATED |
+| src/hooks/useProducts.ts | CREATED |
+| src/hooks/useAdmin.ts | CREATED |
+| src/components/Collections.tsx | MODIFIED - API integration |
+| .env.local | CREATED - Template |
+| supabase-schema.sql | CREATED - Full schema |
+
+CURRENT STATE
+-------------
+- Dev server running at http://localhost:3000
+- TypeScript compiles clean (npx tsc --noEmit passes)
+- Backend API layer 100% complete (Phase 1 + 2)
+- Frontend hooked up to Products API
+- No backend deployed yet - requires Supabase/Resend/Vercel setup
+
+NEXT STEPS FOR DEPLOYMENT
+-------------------------
+1. Create Supabase project at supabase.com
+2. Run supabase-schema.sql in Supabase SQL Editor
+3. Create Resend account at resend.com, verify dsajawat@gmail.com
+4. Fill .env.local with actual keys:
+   - SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_ANON_KEY
+   - RESEND_API_KEY, RESEND_FROM_EMAIL, RESEND_ADMIN_EMAIL
+   - ADMIN_PASSWORD
+5. Deploy to Vercel (import GitHub repo)
+6. Add same env vars in Vercel dashboard
+7. Test Contact form, Quote modal, Collections page
+
+REMAINING WORK (Phase 3 - Admin Dashboard UI)
+---------------------------------------------
+If needed, can build:
+- /admin login page (password or magic link)
+- Admin dashboard with:
+  * Inquiry table (filter, paginate, detail view, status actions)
+  * Product management (CRUD with image upload)
+  * Swatch request management
+  * Stats cards (conversion rate, response time, etc.)
+- Supabase Storage buckets for product images
+
+FREE TIER STACK CONFIRMED
+-------------------------
+- Supabase: 500MB DB, 50k MAU, 1GB Storage, Auth included
+- Vercel: 100GB-hours/mo functions, unlimited personal
+- Resend: 3,000 emails/mo
+- Total: $0/month
+
+ENVIRONMENT VARIABLES NEEDED
+----------------------------
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJ... (server-only)
+SUPABASE_ANON_KEY=eyJ... (client-safe)
+RESEND_API_KEY=re_...
+RESEND_FROM_EMAIL=D SAJAWAT <onboarding@resend.dev>
+RESEND_ADMIN_EMAIL=dsajawat@gmail.com
+ADMIN_PASSWORD=your-secure-password
+ADMIN_URL=https://your-vercel-domain.vercel.app/admin

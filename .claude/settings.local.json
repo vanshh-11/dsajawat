@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:eventfabrics.in)",
+      "WebFetch(domain:github.com)",
+      "PowerShell(npm install *)",
+      "PowerShell(uipro init *)"
+    ]
+  }
+}
