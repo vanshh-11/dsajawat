@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { supabase } from "../utils/supabase";
-import { productSchema } from "../utils/product-validation";
-import { withAuth } from "../utils/auth";
+import { supabase } from "../../utils/supabase";
+import { productSchema } from "../../utils/product-validation";
+import { withAuth } from "../../utils/auth";
 
 async function handler(request: VercelRequest, response: VercelResponse) {
   response.setHeader("Access-Control-Allow-Credentials", "true");
