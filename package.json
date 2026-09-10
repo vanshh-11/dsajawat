@@ -36,8 +36,8 @@
     "node": "24.x"
   },
   "overrides": {
-    "ajv": "^7.2.4",
-    "ajv-keywords": "^5.1.0"
+    "ajv": "^8.12.0",
+    "ajv-keywords": "^6.0.0"
   },
   "devDependencies": {
     "@craco/craco": "^5.9.0",
