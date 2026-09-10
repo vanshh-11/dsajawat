@@ -45,13 +45,13 @@ export async function requireAuth(
 }
 
 export function withAuth(
-  handler: (request: AuthenticatedRequest, response: VercelResponse, auth: { user: AuthenticatedRequest["user"] }) => Promise<void>
+  handler: (request: AuthenticatedRequest, response: VercelResponse) => Promise<VercelResponse | void>
 ) {
   return async (request: VercelRequest, response: VercelResponse) => {
     const auth = await requireAuth(request, response);
     if (!auth) return;
 
     (request as AuthenticatedRequest).user = auth.user;
-    return handler(request as AuthenticatedRequest, response, auth);
+    return handler(request as AuthenticatedRequest, response);
   };
 }

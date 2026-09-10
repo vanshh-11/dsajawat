@@ -14,7 +14,14 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "downlevelIteration": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "api/*": ["api/*"]
+    }
   },
-  "include": ["src"]
+  "include": ["src", "api"],
+  "exclude": ["node_modules", "build"]
 }

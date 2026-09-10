@@ -10,7 +10,7 @@ export const productSchema = z.object({
   gsm: z.number().int().positive().optional(),
   width_cm: z.number().int().positive().optional(),
   composition: z.string().max(100).optional(),
-  colors: z.record(z.string()).optional(),
+  colors: z.record(z.string(), z.string()).optional(),
   min_order_meters: z.number().int().positive().optional(),
   price_per_meter: z.number().positive().optional(),
   featured: z.boolean().optional(),

@@ -32,6 +32,10 @@ export default async function handler(request: VercelRequest, response: VercelRe
       return response.status(401).json({ error: "Invalid or expired magic link" });
     }
 
+    if (!data.session) {
+      return response.status(401).json({ error: "No session data returned" });
+    }
+
     // Check if user is admin
     const { data: adminUser } = await supabase
       .from("admin_users")
