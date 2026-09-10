@@ -1,13 +1,11 @@
 import { z } from "zod";
 
-const sourceTypes = ["contact", "quote", "hero_cta", "collection_card"] as const;
-
 export const inquirySchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
   phone: z.string().min(10, "Phone must be at least 10 digits").max(20),
   eventType: z.string().max(50).optional(),
   message: z.string().max(2000).optional(),
-  source: z.enum(sourceTypes),
+  source: z.enum(["contact", "quote", "hero_cta", "collection_card"]),
   pageUrl: z.string().url().optional(),
   userAgent: z.string().optional(),
   referrer: z.string().optional(),

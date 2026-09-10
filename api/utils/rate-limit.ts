@@ -11,14 +11,14 @@ interface RateLimitEntry {
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
 function getClientIp(request: VercelRequest): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  const realIp = request.headers.get("x-real-ip");
+  const forwarded = request.headers["x-forwarded-for"];
+  const realIp = request.headers["x-real-ip"];
   
   if (forwarded) {
-    return forwarded.split(",")[0]?.trim() || "unknown";
+    return Array.isArray(forwarded) ? forwarded[0]?.trim() || "unknown" : forwarded.split(",")[0]?.trim() || "unknown";
   }
   if (realIp) {
-    return realIp;
+    return Array.isArray(realIp) ? realIp[0] : realIp;
   }
   return "unknown";
 }

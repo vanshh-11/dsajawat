@@ -4,10 +4,8 @@ import { withAuth } from "../../utils/auth";
 import { sendStatusUpdateEmail } from "../../utils/email";
 import { z } from "zod";
 
-const statuses = ["new", "contacted", "quoted", "converted", "spam", "archived"] as const;
-
 const updateSchema = z.object({
-  status: z.enum(statuses).optional(),
+  status: z.enum(["new", "contacted", "quoted", "converted", "spam", "archived"]).optional(),
   priority: z.number().int().optional(),
   notes: z.string().optional(),
   respondedBy: z.string().optional(),
