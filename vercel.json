@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm install --legacy-peer-deps && CI=false npm run build",
+  "buildCommand": "npm install --legacy-peer-deps && FORK_TS_CHECKER_WEBPACK_PLUGIN=0 CI=false GENERATE_SOURCEMAP=false NODE_OPTIONS='--max-old-space-size=4096' react-scripts build",
   "outputDirectory": "build",
   "framework": "create-react-app",
   "rewrites": [
