@@ -13,7 +13,14 @@ const rateLimitStore = new Map<string, RateLimitEntry>();
 function getClientIp(request: VercelRequest): string {
   const forwarded = request.headers.get("x-forwarded-for");
   const realIp = request.headers.get("x-real-ip");
-  return forwarded?.split(",")[0]?.trim() || realIp || "unknown";
+  
+  if (forwarded) {
+    return forwarded.split(",")[0]?.trim() || "unknown";
+  }
+  if (realIp) {
+    return realIp;
+  }
+  return "unknown";
 }
 
 export function checkRateLimit(request: VercelRequest): { allowed: boolean; remaining: number; resetTime: number } {
