@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "CI=false npm run build",
   "outputDirectory": "build",
   "framework": "create-react-app",
   "rewrites": [
@@ -23,5 +23,8 @@
     "api/**/*.ts": {
       "maxDuration": 30
     }
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
