@@ -23,8 +23,5 @@
     "api/**/*.ts": {
       "maxDuration": 30
     }
-  },
-  "engines": {
-    "node": "18.x"
   }
 }
