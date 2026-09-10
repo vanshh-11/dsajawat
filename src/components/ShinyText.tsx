@@ -88,7 +88,7 @@ const ShinyText = ({
     directionRef.current = direction === "left" ? 1 : -1;
     elapsedRef.current = 0;
     progress.set(0);
-  }, [direction]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [direction]);
 
   const backgroundPosition = useTransform(
     progress,
