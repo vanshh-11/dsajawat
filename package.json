@@ -33,7 +33,7 @@
     ]
   },
   "engines": {
-    "node": "20.x"
+    "node": "24.x"
   },
   "devDependencies": {
     "@craco/craco": "^5.9.0",
