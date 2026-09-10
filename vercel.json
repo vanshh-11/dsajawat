@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm install --legacy-peer-deps && CI=false GENERATE_SOURCEMAP=false NODE_OPTIONS='--max-old-space-size=4096' craco build",
+  "buildCommand": "npm install --legacy-peer-deps && DISABLE_ESLINT_PLUGIN=true CI=false GENERATE_SOURCEMAP=false NODE_OPTIONS='--max-old-space-size=4096' craco build",
   "outputDirectory": "build",
   "framework": "create-react-app",
   "rewrites": [
