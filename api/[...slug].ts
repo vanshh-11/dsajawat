@@ -1,14 +1,11 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { supabase } from "./utils/supabase";
 import { z } from "zod";
-
-// Re-export utilities for internal use
-export * from "./utils/supabase";
-export * from "./utils/auth";
-export * from "./utils/email";
-export * from "./utils/validation";
-export * from "./utils/rate-limit";
-export * from "./utils/product-validation";
+import { inquirySchema, swatchRequestSchema } from "./utils/validation";
+import { productSchema, productUpdateSchema } from "./utils/product-validation";
+import { sendAdminNotification, sendCustomerConfirmation, sendStatusUpdateEmail } from "./utils/email";
+import { checkRateLimit, getRateLimitHeaders } from "./utils/rate-limit";
+import { withAuth } from "./utils/auth";
 
 const corsHeaders = {
   "Access-Control-Allow-Credentials": "true",
