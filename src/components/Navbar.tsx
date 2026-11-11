@@ -348,13 +348,14 @@ export default function Navbar({ onOpenQuote }: { onOpenQuote: () => void }) {
           {/* Desktop actions */}
           <div className="hidden items-center gap-6 lg:flex">
             <a
-              href={`tel:${BRAND.phones[0]}`}
+              href={`tel:${BRAND.phones[0].replace(/\s+/g, "")}`}
+              aria-label={`Call now: ${BRAND.phones[0]}`}
               className={`hidden min-h-[44px] items-center gap-2 text-[13px] font-medium transition-colors duration-300 xl:flex ${
                 solid ? "text-ink/70 hover:text-ink" : "text-paper/75 hover:text-paper"
               }`}
             >
               <Phone size={14} aria-hidden="true" />
-              {BRAND.phones[0]}
+              Call Now
             </a>
             <button
               type="button"
@@ -594,7 +595,7 @@ export default function Navbar({ onOpenQuote }: { onOpenQuote: () => void }) {
                       {BRAND.phones.map((phone) => (
                         <a
                           key={phone}
-                          href={`tel:${phone}`}
+                          href={`tel:${phone.replace(/\s+/g, "")}`}
                           className="flex min-h-[40px] items-center gap-3 text-[12px] font-medium text-ink"
                         >
                           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-gold">
@@ -650,7 +651,7 @@ export default function Navbar({ onOpenQuote }: { onOpenQuote: () => void }) {
         }`}
       >
         <a
-          href={`tel:${BRAND.phones[0]}`}
+          href={`tel:${BRAND.phones[0].replace(/\s+/g, "")}`}
           className="flex items-center justify-center gap-2 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink"
         >
           <Phone size={14} className="text-gold" aria-hidden="true" />
