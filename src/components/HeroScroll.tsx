@@ -1,166 +1,192 @@
-import React, { useRef, useEffect } from "react";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
-import { ArrowDown } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowRight, ArrowUpRight, Phone } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { BRAND } from "../types";
+import BlurText from "./ui/BlurText";
+import Magnet from "./ui/Magnet";
+import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
 
-const FRAMES = [
-  "/images/frames/frame_1.png",
-  "/images/frames/frame_2.png",
-  "/images/frames/frame_3.png",
-  "/images/frames/frame_4.png",
-  "/images/frames/frame_5.png",
-  "/images/frames/frame_6.png",
-  "/images/frames/frame_7.png",
-  "/images/frames/frame_8.png",
-  "/images/frames/frame_9.png",
+const HERO_IMAGE = "/images/frames/webp/frame_1.webp";
+
+const HEADLINE = [
+  <>Fabrics for the</>,
+  <><span className="gold-shimmer italic">celebrations</span> India</>,
+  <>remembers.</>,
 ];
 
+const SUPPORTING =
+  "Premium drapes, table linen and event finishes — supplied to decorators, banquet halls and planners across India.";
 
+const PARAGRAPH_CLASS =
+  "mt-6 max-w-[500px] text-[14px] leading-relaxed text-paper/75 md:text-[15px] lg:text-[16px]";
+
+const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+const CORNERS = [
+  "left-4 top-4 border-l border-t md:left-6 md:top-6",
+  "right-4 top-4 border-r border-t md:right-6 md:top-6",
+  "bottom-4 left-4 border-b border-l md:bottom-6 md:left-6",
+  "bottom-4 right-4 border-b border-r md:bottom-6 md:right-6",
+];
 
 interface HeroScrollProps {
   onOpenQuote?: () => void;
 }
 
-export default function HeroScroll({ onOpenQuote }: HeroScrollProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Track scroll progress of the entire container (250vh scroll track)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-
-  // Smooth the scroll input to prevent jumpiness and enable buttery crossfading
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 45,
-    damping: 26,
-    restDelta: 0.001,
-  });
-
-  // Ken Burns Panning (Dynamic Zoom Focal Point)
-  const bgScale = useTransform(smoothProgress, [0, 0.25, 0.5, 0.75, 1], [1.0, 1.02, 1.03, 1.02, 1.0]);
-  const bgX = useTransform(smoothProgress, [0, 0.25, 0.5, 0.75, 1], ["0%", "-1.0%", "1.0%", "-0.5%", "0%"]);
-  const bgY = useTransform(smoothProgress, [0, 0.25, 0.5, 0.75, 1], ["0%", "0.5%", "-0.8%", "0.8%", "0%"]);
-  const bgOpacity = useTransform(smoothProgress, [0, 0.7, 1], [0.95, 0.9, 0.85]);
-
-  // General helpers
-  const arrowOpacity = useTransform(smoothProgress, [0, 0.12], [1, 0]);
-
-  // Preload frame images to avoid flickering during scrolling
-  useEffect(() => {
-    FRAMES.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-    });
-  }, []);
+function HeroCopy({ onOpenQuote }: HeroScrollProps) {
+  const navigate = useNavigate();
+  const reduce = usePrefersReducedMotion();
 
   return (
-    <div ref={containerRef} className="relative h-[400vh] bg-dark overflow-visible">
-      {/* Sticky viewport wrapper */}
-      <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
-        
-        {/* Immersive background media with parallax zoom */}
-        <motion.div
-          className="absolute inset-0 overflow-hidden"
-          style={{
-            scale: bgScale,
-            x: bgX,
-            y: bgY,
-            opacity: bgOpacity,
-            willChange: "transform, opacity",
-          }}
+    <div className="w-full max-w-[760px]">
+      <h1 className="font-serif font-light leading-[0.98] tracking-[-0.02em] text-paper text-[clamp(2.5rem,11vw,3.6rem)] md:text-[clamp(3rem,5.6vw,5.4rem)]">
+        {HEADLINE.map((line, index) => (
+          <span key={index} className="block overflow-hidden pb-[0.06em]">
+            <motion.span
+              className="block will-change-transform"
+              initial={reduce ? false : { y: "112%" }}
+              animate={{ y: 0 }}
+              transition={{ duration: 0.95, delay: 0.08 + index * 0.11, ease }}
+            >
+              {line}
+            </motion.span>
+          </span>
+        ))}
+      </h1>
+
+      {reduce ? (
+        <p className={PARAGRAPH_CLASS}>{SUPPORTING}</p>
+      ) : (
+        <BlurText
+          text={SUPPORTING}
+          className={PARAGRAPH_CLASS}
+          animateBy="words"
+          direction="top"
+          effect="blur"
+          blur={6}
+          distance={10}
+          delay={26}
+          stepDuration={0.32}
+          trigger="load"
+        />
+      )}
+
+      <motion.div
+        initial={reduce ? false : { opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.62, ease }}
+        className="mt-8 flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center"
+      >
+        <Magnet
+          wrapperClassName="w-full md:w-auto"
+          magnetStrength={14}
+          maxOffset={8}
+          padding={70}
+          scale={1}
+          axis="both"
         >
-          {/* Render all frames and step their opacity on scroll (no fade transitions) */}
-          {FRAMES.map((src, i) => {
-            const opacity = useTransform(smoothProgress, (p) => {
-              const activeIdx = Math.min(8, Math.max(0, Math.round(p * 8)));
-              return activeIdx === i ? 1 : 0;
-            });
-
-            return (
-              <motion.img
-                key={i}
-                src={src}
-                alt={`Wedding Venue Frame ${i + 1}`}
-                style={{ opacity }}
-                className="absolute inset-0 w-full h-full object-cover"
-                loading="eager"
-              />
-            );
-          })}
-
-
-        </motion.div>
-
-        {/* Ambient Dark Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/95 pointer-events-none" />
-        <div className="absolute inset-0 bg-radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.8) 100%) pointer-events-none" />
-
-        {/* Custom CSS for offloading sparks animation to GPU compositor */}
-        <style>{`
-          @keyframes floatSpark {
-            0% {
-              transform: translateY(0) scale(0.2);
-              opacity: 0;
-            }
-            50% {
-              opacity: 0.7;
-            }
-            100% {
-              transform: translateY(-90px) scale(1.25);
-              opacity: 0;
-            }
-          }
-          .gpu-spark {
-            animation: floatSpark var(--duration) ease-in-out var(--delay) infinite;
-            will-change: transform, opacity;
-          }
-        `}</style>
-
-        {/* Floating Sparks (GPU Accelerated) */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
-          {[...Array(14)].map((_, i) => {
-            const size = 1 + (i % 3) * 0.5;
-            const duration = 4.5 + (i % 4) * 0.8;
-            const delay = i * 0.3;
-            return (
-              <div
-                key={i}
-                className="absolute rounded-full gpu-spark"
-                style={{
-                  width: size,
-                  height: size,
-                  left: `${5 + ((i * 7.3) % 90)}%`,
-                  top: `${10 + ((i * 8.7) % 80)}%`,
-                  background: `rgba(212, 175, 55, ${0.25 + (i % 3) * 0.15})`,
-                  "--duration": `${duration}s`,
-                  "--delay": `${delay}s`,
-                } as React.CSSProperties}
-              />
-            );
-          })}
-        </div>
-
-        {/* Scroll Indicator (Visible initially, fades as you scroll) */}
-        <motion.div
-          style={{ opacity: arrowOpacity }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 z-25 text-center flex flex-col items-center gap-2"
-        >
-          <p className="text-white/60 text-xs uppercase tracking-[0.2em] font-medium">
-            Scroll to begin
-          </p>
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-            className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center bg-white/5 backdrop-blur-sm"
+          <button
+            type="button"
+            onClick={() => navigate("/collections")}
+            className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gold-bright px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink shadow-lg shadow-gold/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-paper md:w-auto"
           >
-            <ArrowDown className="text-amber-400" size={14} />
-          </motion.div>
-        </motion.div>
+            Explore Collections
+            <ArrowRight
+              size={15}
+              aria-hidden="true"
+              className="transition-transform duration-300 group-hover:translate-x-1"
+            />
+          </button>
+        </Magnet>
+        <button
+          type="button"
+          onClick={onOpenQuote}
+          className="group inline-flex w-full items-center justify-center gap-2 rounded-full border border-paper/30 bg-white/5 px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-paper backdrop-blur-sm transition-colors duration-300 hover:border-paper hover:bg-paper hover:text-ink md:w-auto"
+        >
+          Request a Quote
+          <ArrowUpRight
+            size={15}
+            aria-hidden="true"
+            className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+          />
+        </button>
+      </motion.div>
 
+      <div className="mt-8 flex items-center gap-3 border-t border-paper/15 pt-5 md:hidden">
+        <Phone size={13} className="text-gold-bright" aria-hidden="true" />
+        <a
+          href={`tel:${BRAND.phones[0]}`}
+          className="inline-flex min-h-[44px] items-center text-[11px] font-medium uppercase tracking-[0.16em] text-paper/70"
+        >
+          Call the studio
+        </a>
+        <span aria-hidden="true" className="h-3 w-px bg-paper/20" />
+        <span className="text-[10px] uppercase tracking-[0.16em] text-paper/50">
+          Reply within 48 hrs
+        </span>
       </div>
-      
-      {/* Background spacer for the remainder of the scroll track */}
-      <div className="h-px bg-transparent pointer-events-none" />
     </div>
+  );
+}
+
+export default function HeroScroll({ onOpenQuote }: HeroScrollProps) {
+  return (
+    <section
+      id="top"
+      className="relative flex min-h-[100svh] items-end overflow-hidden bg-deep md:min-h-screen md:items-center"
+    >
+      <img
+        src={HERO_IMAGE}
+        alt="D Sajawat draped fabric setting"
+        className="absolute inset-0 h-full w-full object-cover object-[62%_center] md:object-center"
+        loading="eager"
+        decoding="async"
+        draggable={false}
+      />
+
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/75 via-ink/35 to-ink/90 md:bg-gradient-to-r md:from-ink/90 md:via-ink/45 md:to-ink/10"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/75 via-transparent to-transparent md:hidden"
+      />
+
+      {/* Editorial frame */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-3 z-10 border border-paper/15 md:inset-5"
+      />
+      {CORNERS.map((corner) => (
+        <span
+          key={corner}
+          aria-hidden="true"
+          className={`pointer-events-none absolute z-10 h-5 w-5 border-gold-bright/60 md:h-6 md:w-6 ${corner}`}
+        />
+      ))}
+
+      <div className="container relative z-10 pb-24 pt-28 md:pb-28 md:pt-24">
+        <HeroCopy onOpenQuote={onOpenQuote} />
+      </div>
+
+      {/* Bottom rail */}
+      <div className="absolute inset-x-0 bottom-0 z-10 hidden border-t border-paper/15 md:block">
+        <span
+          aria-hidden="true"
+          className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-bright/50 to-transparent"
+        />
+        <div className="container flex h-16 items-center justify-end">
+          <div className="flex items-center gap-4">
+            <span className="text-[9px] font-medium uppercase tracking-[0.24em] text-paper/55">
+              Scroll to explore
+            </span>
+            <span aria-hidden="true" className="relative h-8 w-px bg-paper/20">
+              <span className="absolute inset-x-0 top-0 h-3 bg-gold-bright" />
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }

@@ -1,110 +1,121 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import Collections from "../components/Collections";
 import Footer from "../components/Footer";
 
+const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+const META = ["08 series", "MOQ from 10 m", "48-hr dispatch"];
+
 export default function CollectionsPage() {
   return (
     <>
-      {/* Hero Section for Collections Page */}
-      <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-gray-900">
-        {/* Background Image */}
-        <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1600"
-            alt="Collections"
-            className="w-full h-full object-cover opacity-40"
+      <main id="main-content">
+        {/* Page header */}
+        <section className="relative overflow-hidden border-b border-line bg-gradient-to-b from-amber-50/60 via-paper to-paper pb-16 pt-24 md:pb-20 md:pt-28">
+          <motion.div
+            aria-hidden="true"
+            className="pointer-events-none absolute -left-24 top-8 h-80 w-80 rounded-full bg-amber-300/10 blur-3xl"
+            animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
+            transition={{ duration: 9, repeat: Infinity }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80" />
-        </div>
-
-        {/* Content */}
-        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-          {/* Back Button */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-8"
-          >
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 text-white/70 hover:text-amber-400 transition-colors text-sm font-medium group"
-            >
-              <motion.div
-                className="group-hover:-translate-x-1 transition-transform"
-              >
-                <ArrowLeft size={18} />
-              </motion.div>
-              Back to Home
-            </Link>
-          </motion.div>
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-16 bottom-0 h-72 w-72 rounded-full bg-gold/5 blur-3xl"
+            animate={{ scale: [1.1, 1, 1.1], opacity: [0.4, 0.7, 0.4] }}
+            transition={{ duration: 11, repeat: Infinity }}
+          />
 
-          {/* Overline */}
-          <motion.div
-            className="flex items-center justify-center gap-4 mb-8"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <div className="h-px w-16 bg-gradient-to-r from-transparent to-amber-400" />
-            <span className="text-sm font-bold tracking-[0.2em] uppercase text-amber-400">
-              D Sajawat
-            </span>
-            <div className="h-px w-16 bg-gradient-to-l from-transparent to-amber-400" />
-          </motion.div>
-
-          {/* Title */}
-          <motion.h1
-            className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6"
-            style={{ fontFamily: "Georgia, serif" }}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-          >
-            Our{" "}
-            <span className="text-amber-400">Collections</span>
-          </motion.h1>
-
-          {/* Subtitle */}
-          <motion.p
-            className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            Explore our curated range of premium fabrics, drapes, and event
-            essentials crafted for unforgettable celebrations
-          </motion.p>
-        </div>
-
-        {/* Scroll Indicator */}
-        <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-        >
-          <motion.div
-            className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-1.5"
-            animate={{ borderColor: ["rgba(255,255,255,0.3)", "rgba(255,255,255,0.6)", "rgba(255,255,255,0.3)"] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
+          <div className="container relative z-10">
             <motion.div
-              className="w-1.5 h-1.5 bg-amber-400 rounded-full"
-              animate={{ y: [0, 12, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            />
-</motion.div>
-        </motion.div>
-    </section>
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease }}
+              className="flex items-center justify-between gap-4"
+            >
+              <Link
+                to="/"
+                className="group inline-flex min-h-[44px] items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted transition-colors duration-300 hover:text-ink"
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-white text-ink shadow-sm shadow-ink/5 transition-colors duration-300 group-hover:border-gold/40 group-hover:text-gold">
+                  <ArrowLeft size={14} aria-hidden="true" />
+                </span>
+                Back to home
+              </Link>
+            </motion.div>
 
-      {/* Collections Grid */}
-      <Collections />
+            <div className="mt-12 text-center md:mt-16">
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1, ease }}
+              >
+                <div className="mb-7 flex items-center justify-center gap-4">
+                  <motion.span
+                    aria-hidden="true"
+                    initial={{ width: 0 }}
+                    animate={{ width: 80 }}
+                    transition={{ delay: 0.4, duration: 0.8 }}
+                    className="hidden h-px bg-gradient-to-r from-transparent to-gold/70 sm:block"
+                  />
+                  <span className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.2em] text-gold md:text-[13px]">
+                    <Sparkles size={14} aria-hidden="true" />
+                    The collections
+                  </span>
+                  <motion.span
+                    aria-hidden="true"
+                    initial={{ width: 0 }}
+                    animate={{ width: 80 }}
+                    transition={{ delay: 0.4, duration: 0.8 }}
+                    className="hidden h-px bg-gradient-to-l from-transparent to-gold/70 sm:block"
+                  />
+                </div>
 
-      {/* Footer */}
+                <h1 className="mx-auto max-w-4xl font-serif text-[clamp(2.25rem,5.4vw,4.25rem)] font-semibold leading-[1.05] tracking-[-0.01em] text-ink">
+                  Our collections, finished for every{" "}
+                  <span className="gold-shimmer italic">celebration</span>.
+                </h1>
+
+                <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-[1.85] text-muted md:text-[16px]">
+                  Premium drapes, table linen and event finishes — a curated range for
+                  decorators, banquet halls and planners across India.
+                </p>
+              </motion.div>
+
+              {/* Meta rail */}
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3, ease }}
+                className="mx-auto mt-9 flex max-w-xl flex-wrap items-center justify-center gap-x-5 gap-y-3 border-y border-line py-4 text-[9px] font-semibold uppercase tracking-[0.22em] text-muted"
+              >
+                {META.map((item, index) => (
+                  <React.Fragment key={item}>
+                    {index > 0 && (
+                      <span aria-hidden="true" className="hidden h-4 w-px bg-line sm:block" />
+                    )}
+                    <span className="flex items-center gap-2">
+                      {index === 0 && (
+                        <span
+                          aria-hidden="true"
+                          className="h-1.5 w-1.5 rounded-full bg-gold-bright"
+                        />
+                      )}
+                      {item}
+                    </span>
+                  </React.Fragment>
+                ))}
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* Collections grid */}
+        <Collections />
+      </main>
+
       <Footer />
     </>
   );

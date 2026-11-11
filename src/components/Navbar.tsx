@@ -1,427 +1,671 @@
-import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Phone, Sparkles, ChevronDown } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { BRAND } from "../types";
+import React, { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
+import {
+  ArrowUpRight,
+  ChevronDown,
+  Instagram,
+  MapPin,
+  Menu,
+  MessageCircle,
+  Phone,
+  Sparkles,
+  X,
+} from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { BRAND, COLLECTIONS } from "../types";
 
 const navLinks = [
-  { label: "Home", href: "#top" },
   { label: "About", href: "#about" },
+  { label: "Our Work", href: "#work" },
   { label: "Reviews", href: "#reviews" },
   { label: "Contact", href: "#contact" },
 ];
 
-const collections = [
-  { label: "Premium Fabrics", image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=100&h=100&fit=crop" },
-  { label: "Printed Fabrics", image: "https://images.unsplash.com/photo-1529694157872-4e0c0f6b7d3?w=100&h=100&fit=crop" },
-  { label: "Chair Covers", image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=100&h=100&fit=crop" },
-  { label: "Table Covers", image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=100&h=100&fit=crop" },
-  { label: "Pillow & Cushion Covers", image: "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=100&h=100&fit=crop" },
-  { label: "Curtains", image: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100&h=100&fit=crop" },
-  { label: "Ceilings", image: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=100&h=100&fit=crop" },
-  { label: "Decor Accessories", image: "https://images.unsplash.com/photo-1529636798458-92182e662485?w=100&h=100&fit=crop" },
-  { label: "Props", image: "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=100&h=100&fit=crop" },
-  { label: "Console Tables", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=100&h=100&fit=crop" },
-  { label: "Chandeliers", image: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100&h=100&fit=crop" },
-  { label: "Home Decor", image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=100&h=100&fit=crop" },
-  { label: "Artificial Flowers", image: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=100&h=100&fit=crop" },
-];
+const easeOut: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+const menuContainer: Variants = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.055, delayChildren: 0.12 },
+  },
+};
+
+const menuItem: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: easeOut } },
+};
+
+function Monogram({ tone }: { tone: "paper" | "ink" }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-colors duration-500 md:h-10 md:w-10 ${
+        tone === "ink"
+          ? "border-gold/25 bg-white text-ink shadow-sm shadow-ink/5"
+          : "border-paper/30 bg-white/10 text-paper backdrop-blur-sm"
+      }`}
+    >
+      <span className="font-serif text-[17px] leading-none md:text-[19px]">D</span>
+    </span>
+  );
+}
 
 export default function Navbar({ onOpenQuote }: { onOpenQuote: () => void }) {
   const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
   const [collectionsOpen, setCollectionsOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [showMobileBar, setShowMobileBar] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const openButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  const location = useLocation();
   const navigate = useNavigate();
-
-  // "pastHero" = user has scrolled past the hero section (navbar appears)
-  // "scrolled" = user has scrolled further (navbar style changes)
-  const [pastHero, setPastHero] = useState(false);
+  const isHome = location.pathname === "/";
+  const onCollections = location.pathname === "/collections";
+  const solid = !isHome || scrolled || mobileOpen;
 
   useEffect(() => {
+    const sectionIds = ["about", "work", "reviews", "contact"];
     const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const heroHeight = window.innerHeight * 2.9;
-      setPastHero(scrollY > heroHeight);
-      setScrolled(scrollY > heroHeight);
+      setScrolled(window.scrollY > 64);
+      setShowMobileBar(window.scrollY > 480);
+
+      if (location.pathname !== "/") {
+        setActiveSection("");
+        return;
+      }
+      const current = sectionIds.find((id) => {
+        const el = document.getElementById(id);
+        if (!el) return false;
+        const rect = el.getBoundingClientRect();
+        return rect.top <= 150 && rect.bottom > 150;
+      });
+      setActiveSection(current ? `#${current}` : "");
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [location.pathname]);
 
   useEffect(() => {
+    setCollectionsOpen(false);
+    setMobileOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const original = document.body.style.overflow;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    document.body.style.overflow = "hidden";
+
+    const focusTimer = window.setTimeout(() => closeButtonRef.current?.focus(), 60);
+
+    const handleTab = (event: KeyboardEvent) => {
+      if (event.key !== "Tab" || !menuRef.current) return;
+      const focusable = menuRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleTab);
+
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener("keydown", handleTab);
+      document.body.style.overflow = original;
+      (previouslyFocused && previouslyFocused !== document.body
+        ? previouslyFocused
+        : openButtonRef.current
+      )?.focus();
+    };
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setCollectionsOpen(false);
+        setMobileOpen(false);
+      }
+    };
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setCollectionsOpen(false);
       }
     };
+    document.addEventListener("keydown", handleKey);
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
-  const scrollToSection = (href: string) => {
-    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+  const goToSection = (href: string) => {
+    const wasOpen = mobileOpen;
+    setMobileOpen(false);
+    const scrollToTarget = () => {
+      document.querySelector(href)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    if (!isHome) {
+      navigate("/");
+      window.setTimeout(scrollToTarget, 420);
+      return;
+    }
+    if (wasOpen) {
+      window.setTimeout(scrollToTarget, 160);
+      return;
+    }
+    scrollToTarget();
   };
+
+  const linkTone = solid ? "text-ink/70 hover:text-ink" : "text-paper/75 hover:text-paper";
+
+  const rowClass =
+    "group mb-2.5 flex min-h-[60px] items-center justify-between gap-4 rounded-2xl border border-line/70 bg-white px-4 py-3 shadow-sm shadow-ink/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-gold/40 hover:shadow-md";
+  const rowNumberClass = "w-6 shrink-0 font-serif text-[11px] italic text-muted";
+  const rowLabelClass =
+    "font-serif text-[26px] leading-none text-ink transition-colors duration-300 group-hover:text-gold";
 
   return (
     <>
-      {/* Glassy Navbar - Centered, appears after scrolling past hero */}
-      <AnimatePresence>
-        {pastHero && (
-          <motion.header
-            className="fixed inset-x-4 top-6 z-50 flex justify-center"
-            initial={{ y: -100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -100, opacity: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          >
-        <motion.div
-          className={`w-full max-w-5xl rounded-full px-8 py-4 transition-all duration-500 ${
-            scrolled
-              ? "bg-white/40 backdrop-blur-3xl shadow-2xl shadow-black/5 border border-white/50"
-              : "bg-black/25 backdrop-blur-3xl border border-white/15"
-          }`}
-          layout
-          whileHover={{ boxShadow: scrolled ? "0 20px 60px rgba(0,0,0,0.1)" : "0 20px 60px rgba(212,175,55,0.1)" }}
-        >
-          <div className="flex items-center justify-between">
-            {/* Logo with Magnetic Effect */}
-            <motion.a
-              href="#top"
-              className="flex items-center relative"
-              onClick={(e) => { e.preventDefault(); scrollToSection("#top"); }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <motion.span
-                className="text-2xl font-bold tracking-wider"
-                style={{
-                  background: "linear-gradient(135deg, #d4af37 0%, #f4d47c 25%, #d4af37 50%, #c9a032 75%, #d4af37 100%)",
-                  backgroundSize: "200% 200%",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
-                animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+      <header
+        className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,box-shadow] duration-500 ${
+          solid
+            ? "border-b border-line bg-paper/95 shadow-[0_1px_0_rgba(23,20,18,0.02)] backdrop-blur-md"
+            : "border-b border-transparent bg-gradient-to-b from-ink/55 via-ink/20 to-transparent"
+        }`}
+      >
+        <div className="container flex h-16 items-center justify-between md:h-[72px]">
+          {/* Wordmark */}
+          <Link to="/" className="group flex items-center gap-3" aria-label="D Sajawat home">
+            <Monogram tone={solid ? "ink" : "paper"} />
+            <span className="flex flex-col leading-none">
+              <span
+                className={`font-serif text-[19px] tracking-[0.18em] transition-colors duration-500 md:text-[21px] ${
+                  solid ? "text-ink" : "text-paper"
+                }`}
               >
                 D SAJAWAT
-              </motion.span>
-            </motion.a>
-
-            {/* Desktop Navigation with Animated Underlines */}
-            <nav className="hidden lg:flex items-center gap-10">
-              {navLinks.map((link, i) => (
-                <NavLink
-                  key={link.href}
-                  href={link.href}
-                  scrolled={scrolled}
-                  delay={i * 0.1}
-                  onClick={() => scrollToSection(link.href)}
-                >
-                  {link.label}
-                </NavLink>
-              ))}
-            </nav>
-
-            {/* Collections Dropdown */}
-            <div ref={dropdownRef} className="hidden lg:block relative">
-              <motion.button
-                className={`text-sm font-medium transition-colors flex items-center gap-1 group ${
-                  scrolled ? "text-gray-700 hover:text-amber-500" : "text-white/90 hover:text-white"
+              </span>
+              <span
+                className={`mt-1 text-[7px] font-medium uppercase tracking-[0.3em] transition-colors duration-500 md:text-[8px] ${
+                  solid ? "text-gold" : "text-paper/60"
                 }`}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                onClick={() => setCollectionsOpen(!collectionsOpen)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              >
+                Fabrics · Ludhiana
+              </span>
+            </span>
+          </Link>
+
+          {/* Desktop nav */}
+          <nav className="hidden items-center gap-8 lg:flex" aria-label="Primary">
+            <div
+              ref={dropdownRef}
+              className="relative"
+              onMouseEnter={() => setCollectionsOpen(true)}
+              onMouseLeave={() => setCollectionsOpen(false)}
+            >
+              <button
+                type="button"
+                onClick={() => setCollectionsOpen((value) => !value)}
+                aria-expanded={collectionsOpen}
+                aria-haspopup="true"
+                className={`group relative flex min-h-[44px] items-center gap-1.5 py-2 text-[13px] font-medium tracking-[0.02em] transition-colors duration-300 ${
+                  onCollections ? (solid ? "text-ink" : "text-paper") : linkTone
+                }`}
               >
                 Collections
-                <motion.div
-                  animate={{ rotate: collectionsOpen ? 180 : 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <ChevronDown size={16} className={`transition-colors ${scrolled ? "text-gray-700 group-hover:text-amber-500" : "text-white/90 group-hover:text-white"}`} />
-                </motion.div>
-                <motion.span
-                  className="absolute -bottom-1 left-0 h-0.5 bg-amber-400"
-                  initial={{ width: 0 }}
-                  animate={{ width: collectionsOpen ? "100%" : 0 }}
-                  transition={{ duration: 0.3 }}
+                <ChevronDown
+                  size={14}
+                  aria-hidden="true"
+                  className={`transition-transform duration-300 ${collectionsOpen ? "rotate-180" : ""}`}
                 />
-              </motion.button>
+                <span
+                  aria-hidden="true"
+                  className={`absolute inset-x-0 bottom-0 h-px origin-left bg-gold transition-transform duration-300 group-hover:scale-x-100 ${
+                    onCollections ? "scale-x-100" : "scale-x-0"
+                  }`}
+                />
+              </button>
 
-              {/* Glassy Dropdown with Enhanced Animation */}
               <AnimatePresence>
                 {collectionsOpen && (
                   <motion.div
-                    initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 15, scale: 0.95 }}
-                    transition={{ duration: 0.25, ease: "easeOut" }}
-                    className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-80 bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl overflow-hidden border border-white/50"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.22, ease: easeOut }}
+                    className="absolute left-1/2 top-full w-[620px] -translate-x-1/2 pt-4"
                   >
-                    {/* Decorative Top Gradient */}
-                    <div className="h-1 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400" />
+                    <div className="relative overflow-hidden rounded-3xl border border-line/70 bg-paper shadow-xl shadow-ink/10">
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-amber-400/60 to-transparent"
+                      />
+                      <div className="flex items-center justify-between border-b border-line/80 bg-gradient-to-r from-amber-50/70 via-paper to-paper px-6 py-3">
+                        <span className="text-[9px] font-semibold uppercase tracking-[0.26em] text-muted">
+                          The collections
+                        </span>
+                        <span className="text-[9px] font-semibold uppercase tracking-[0.26em] text-gold">
+                          {String(COLLECTIONS.length).padStart(2, "0")} series
+                        </span>
+                      </div>
 
-                    {/* Scrollable List */}
-                    <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-amber-200 scrollbar-track-transparent py-3">
-                      {collections.map((item, i) => (
-                        <motion.a
-                          key={item.label}
-                          href="/collections"
-                          className="group flex items-center gap-4 px-5 py-3 mx-2 rounded-2xl hover:bg-amber-50 transition-all"
-                          initial={{ opacity: 0, x: -15 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.03 }}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            navigate("/collections");
-                            setCollectionsOpen(false);
-                          }}
-                          whileHover={{ x: 5 }}
-                        >
-                          <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 shadow-md group-hover:shadow-lg transition-shadow">
-                            <img
-                              src={item.image}
-                              alt={item.label}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                              loading="lazy"
-                            />
+                      <div className="grid grid-cols-[1fr_190px]">
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-0.5 p-5">
+                          {COLLECTIONS.map((item) => (
+                            <Link
+                              key={item.id}
+                              to="/collections"
+                              className="group flex items-center justify-between rounded-md px-3 py-2.5 text-[13px] text-ink/75 transition-colors hover:bg-gold-tint/60 hover:text-ink"
+                            >
+                              <span className="flex items-baseline gap-2.5">
+                                <span className="text-[9px] tabular-nums text-muted">
+                                  {item.overline.replace("Series ", "")}
+                                </span>
+                                {item.title}
+                              </span>
+                              <ArrowUpRight
+                                size={13}
+                                aria-hidden="true"
+                                className="text-gold opacity-0 transition-opacity group-hover:opacity-100"
+                              />
+                            </Link>
+                          ))}
+                        </div>
+
+                        <Link to="/collections" className="group relative block">
+                          <img
+                            src={COLLECTIONS[6].image}
+                            alt=""
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" />
+                          <div className="absolute inset-x-0 bottom-0 p-4">
+                            <p className="text-[9px] font-medium uppercase tracking-[0.22em] text-paper/70">
+                              Featured
+                            </p>
+                            <p className="mt-1 flex items-center gap-1.5 font-serif text-[17px] leading-tight text-paper">
+                              View all
+                              <ArrowUpRight size={13} aria-hidden="true" />
+                            </p>
                           </div>
-                          <span className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors">
-                            {item.label}
-                          </span>
-                        </motion.a>
-                      ))}
+                        </Link>
+                      </div>
+
+                      <div className="flex items-center justify-between border-t border-line/80 bg-gradient-to-r from-paper to-amber-50/50 px-6 py-2.5">
+                        <span className="text-[9px] uppercase tracking-[0.22em] text-muted">
+                          Supplied across India
+                        </span>
+                      </div>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Desktop CTA with Glow */}
-            <div className="hidden lg:flex items-center gap-5">
-              <motion.a
-                href={`tel:${BRAND.phones[0]}`}
-                className={`flex items-center gap-2 text-sm font-medium ${scrolled ? "text-amber-500" : "text-white"}`}
-                whileHover={{ scale: 1.05, color: "#f59e0b" }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
+            {navLinks.map((link) => {
+              const isActive = isHome && activeSection === link.href;
+              return (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  aria-current={isActive ? "location" : undefined}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    goToSection(link.href);
+                  }}
+                  className={`group relative flex min-h-[44px] items-center py-2 text-[13px] font-medium tracking-[0.02em] transition-colors duration-300 ${
+                    isActive ? (solid ? "text-ink" : "text-paper") : linkTone
+                  }`}
                 >
-                  <Phone size={16} />
-                </motion.div>
-                <span>Call Now</span>
-              </motion.a>
-              <motion.button
-                onClick={onOpenQuote}
-                className="px-6 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-white font-semibold text-sm rounded-full flex items-center gap-2 shadow-lg shadow-amber-500/30 relative overflow-hidden group"
-                whileHover={{
-                  scale: 1.05,
-                  boxShadow: "0 15px 40px rgba(212, 175, 55, 0.4)"
-                }}
-                whileTap={{ scale: 0.98 }}
-              >
-                {/* Shine Effect */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                  initial={{ x: "-100%" }}
-                  whileHover={{ x: "200%" }}
-                  transition={{ duration: 0.5 }}
-                />
-                <Sparkles size={16} className="relative z-10" />
-                <span className="relative z-10">Get Quote</span>
-              </motion.button>
-            </div>
+                  {link.label}
+                  <span
+                    aria-hidden="true"
+                    className={`absolute inset-x-0 bottom-0 h-px origin-left bg-gold transition-transform duration-300 group-hover:scale-x-100 ${
+                      isActive ? "scale-x-100" : "scale-x-0"
+                    }`}
+                  />
+                </a>
+              );
+            })}
+          </nav>
 
-            {/* Mobile Menu Button */}
-            <motion.button
-              className={`lg:hidden p-2.5 rounded-full transition-all ${
-                scrolled ? "bg-gray-100 text-gray-800" : "bg-white/20 text-white"
+          {/* Desktop actions */}
+          <div className="hidden items-center gap-6 lg:flex">
+            <a
+              href={`tel:${BRAND.phones[0]}`}
+              className={`hidden min-h-[44px] items-center gap-2 text-[13px] font-medium transition-colors duration-300 xl:flex ${
+                solid ? "text-ink/70 hover:text-ink" : "text-paper/75 hover:text-paper"
               }`}
-              onClick={() => setOpen(!open)}
-              whileTap={{ scale: 0.9 }}
-              whileHover={{ scale: 1.05 }}
             >
-              {open ? <X size={22} /> : <Menu size={22} />}
-            </motion.button>
+              <Phone size={14} aria-hidden="true" />
+              {BRAND.phones[0]}
+            </a>
+            <button
+              type="button"
+              onClick={onOpenQuote}
+              className="group inline-flex items-center gap-2 rounded-full bg-gold-bright px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink shadow-lg shadow-gold/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-ink hover:text-paper"
+            >
+              Request a Quote
+              <ArrowUpRight
+                size={14}
+                aria-hidden="true"
+                className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+              />
+            </button>
           </div>
-        </motion.div>
-      </motion.header>
-        )}
-      </AnimatePresence>
 
-      {/* Mobile Menu - Enhanced Animation */}
+          {/* Mobile trigger */}
+          <button
+            ref={openButtonRef}
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open menu"
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-menu"
+            className={`-mr-2 flex h-11 w-11 items-center justify-center transition-colors duration-500 lg:hidden ${
+              solid ? "text-ink" : "text-paper"
+            }`}
+          >
+            <Menu size={24} strokeWidth={1.5} aria-hidden="true" />
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile drawer */}
       <AnimatePresence>
-        {open && (
+        {mobileOpen && (
           <>
             <motion.div
+              key="backdrop"
+              aria-hidden="true"
+              onClick={() => setMobileOpen(false)}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/70 backdrop-blur-md z-40 lg:hidden"
-              onClick={() => setOpen(false)}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 z-[60] bg-transparent lg:hidden"
             />
 
-            {/* Slide-in Panel */}
             <motion.div
+              key="drawer"
+              ref={menuRef}
+              id="mobile-menu"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Site menu"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 28, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-[360px] max-w-[90vw] z-50 bg-white/98 backdrop-blur-2xl shadow-2xl overflow-y-auto"
-              style={{ borderRadius: "28px 0 0 28px" }}
+              transition={{ duration: 0.45, ease: easeOut }}
+              className="fixed inset-y-0 right-0 z-[70] flex w-[88vw] max-w-[420px] flex-col rounded-l-[32px] border-l border-line/70 bg-paper shadow-2xl lg:hidden"
             >
-              {/* Decorative Header */}
-              <div className="bg-gradient-to-r from-amber-400 to-amber-500 h-2" />
-
-              <div className="flex flex-col h-full p-8">
-                {/* Logo & Close */}
-                <div className="flex justify-between items-center mb-10">
-                  <motion.span
-                    className="text-2xl font-bold tracking-wider bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent"
-                    style={{ fontFamily: "Georgia, serif" }}
-                  >
-                    D SAJAWAT
-                  </motion.span>
-                  <motion.button
-                    onClick={() => setOpen(false)}
-                    className="p-2.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                    whileTap={{ scale: 0.9 }}
-                    whileHover={{ scale: 1.05 }}
-                  >
-                    <X size={20} />
-                  </motion.button>
-                </div>
-
-                {/* Navigation Links */}
-                <nav className="flex flex-col gap-2 flex-1">
-                  {navLinks.map((link, i) => (
-                    <motion.a
-                      key={link.href}
-                      href={link.href}
-                      className="text-lg font-semibold text-gray-800 hover:text-amber-500 transition-colors py-3 px-5 rounded-2xl hover:bg-amber-50 flex items-center gap-4"
-                      style={{ fontFamily: "Georgia, serif" }}
-                      initial={{ opacity: 0, x: 40 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.08 }}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        scrollToSection(link.href);
-                        setOpen(false);
-                      }}
-                      whileHover={{ x: 8 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <motion.div
-                        className="w-2 h-2 rounded-full bg-amber-400"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: 0.3 + i * 0.08 }}
-                      />
-                      {link.label}
-                    </motion.a>
-                  ))}
-
-                  {/* Mobile Collections Link */}
-                  <div className="mt-4">
-                    <motion.a
-                      href="/collections"
-                      className="flex items-center gap-4 text-lg font-semibold text-gray-800 py-3 px-5 rounded-2xl hover:bg-amber-50 transition-colors"
-                      style={{ fontFamily: "Georgia, serif" }}
-                      initial={{ opacity: 0, x: 40 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigate("/collections");
-                        setOpen(false);
-                      }}
-                    >
-                      <motion.div className="w-2 h-2 rounded-full bg-amber-400" />
-                      Collections
-                    </motion.a>
+              {/* Drawer header */}
+              <div className="relative flex h-16 shrink-0 items-center justify-between border-b border-line/80 bg-gradient-to-r from-amber-50/80 via-paper to-paper px-5">
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent"
+                />
+                <div className="flex items-center gap-3">
+                  <Monogram tone="ink" />
+                  <div className="leading-none">
+                    <p className="text-[8px] font-medium uppercase tracking-[0.3em] text-muted">
+                      Menu
+                    </p>
+                    <p className="mt-1 font-serif text-[15px] tracking-[0.16em] text-ink">
+                      D SAJAWAT
+                    </p>
                   </div>
-                </nav>
-
-                {/* CTA Buttons */}
-                <div className="flex flex-col gap-4 pt-6 border-t border-gray-100">
-                  <motion.a
-                    href={`tel:${BRAND.phones[0]}`}
-                    className="flex items-center justify-center gap-3 px-6 py-3.5 border-2 border-gray-200 rounded-full text-gray-700 font-medium hover:border-amber-400 hover:text-amber-500 transition-all"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setOpen(false)}
-                  >
-                    <Phone size={18} />
-                    <span>Call Now</span>
-                  </motion.a>
-                  <motion.button
-                    onClick={() => { setOpen(false); onOpenQuote(); }}
-                    className="flex items-center justify-center gap-3 px-6 py-3.5 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full text-white font-semibold shadow-lg shadow-amber-500/30"
-                    whileHover={{ scale: 1.02, boxShadow: "0 15px 40px rgba(212, 175, 55, 0.4)" }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Sparkles size={18} />
-                    <span>Get Quote</span>
-                  </motion.button>
                 </div>
+                <button
+                  ref={closeButtonRef}
+                  type="button"
+                  onClick={() => setMobileOpen(false)}
+                  aria-label="Close menu"
+                  className="-mr-2 flex h-11 w-11 items-center justify-center text-ink"
+                >
+                  <X size={24} strokeWidth={1.5} aria-hidden="true" />
+                </button>
+              </div>
+
+              {/* Drawer body */}
+              <div className="no-scrollbar flex-1 overflow-y-auto">
+                <motion.nav
+                  variants={menuContainer}
+                  initial="hidden"
+                  animate="show"
+                  aria-label="Mobile"
+                  className="px-5 pt-6"
+                >
+                  <motion.div
+                    variants={menuItem}
+                    className="flex items-center justify-between pb-3"
+                  >
+                    <span className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.28em] text-muted">
+                      <Sparkles size={11} className="text-gold" aria-hidden="true" />
+                      Navigate
+                    </span>
+                    <span className="text-[9px] font-semibold uppercase tracking-[0.28em] text-gold">
+                      05
+                    </span>
+                  </motion.div>
+
+                  <motion.div variants={menuItem}>
+                    <Link
+                      to="/collections"
+                      onClick={() => setMobileOpen(false)}
+                      className={rowClass}
+                    >
+                      <span className="flex items-baseline gap-4">
+                        <span className={rowNumberClass}>01</span>
+                        <span className={rowLabelClass}>Collections</span>
+                      </span>
+                      <span className="flex items-center gap-2">
+                        <span className="text-[9px] uppercase tracking-[0.2em] text-muted">
+                          {String(COLLECTIONS.length).padStart(2, "0")}
+                        </span>
+                        <ArrowUpRight
+                          size={16}
+                          aria-hidden="true"
+                          className="text-gold transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                        />
+                      </span>
+                    </Link>
+                  </motion.div>
+
+                  {navLinks.map((link, index) => {
+                    const isActive = isHome && activeSection === link.href;
+                    return (
+                      <motion.div key={link.href} variants={menuItem}>
+                        <a
+                          href={link.href}
+                          aria-current={isActive ? "location" : undefined}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            goToSection(link.href);
+                          }}
+                          className={rowClass}
+                        >
+                          <span className="flex items-baseline gap-4">
+                            <span className={rowNumberClass}>
+                              {String(index + 2).padStart(2, "0")}
+                            </span>
+                            <span className={rowLabelClass}>{link.label}</span>
+                            {isActive && (
+                              <span
+                                aria-hidden="true"
+                                className="mb-1.5 h-1 w-1 rounded-full bg-gold"
+                              />
+                            )}
+                          </span>
+                          <ArrowUpRight
+                            size={16}
+                            aria-hidden="true"
+                            className="text-gold transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                          />
+                        </a>
+                      </motion.div>
+                    );
+                  })}
+                </motion.nav>
+
+                {/* Featured series */}
+                <motion.div
+                  variants={menuItem}
+                  initial="hidden"
+                  animate="show"
+                  className="px-5 pt-6"
+                >
+                  <Link
+                    to="/collections"
+                    onClick={() => setMobileOpen(false)}
+                    className="group relative block overflow-hidden rounded-3xl border border-line/70 shadow-lg shadow-ink/10"
+                  >
+                    <img
+                      src={COLLECTIONS[6].image}
+                      alt=""
+                      className="h-36 w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4">
+                      <div>
+                        <p className="text-[8px] uppercase tracking-[0.26em] text-paper/70">
+                          Featured series
+                        </p>
+                        <p className="mt-1 font-serif text-[20px] leading-tight text-paper">
+                          {COLLECTIONS[6].title}
+                        </p>
+                      </div>
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full border border-paper/35 text-paper">
+                        <ArrowUpRight size={15} aria-hidden="true" />
+                      </span>
+                    </div>
+                  </Link>
+                </motion.div>
+
+                {/* Studio details */}
+                <motion.div
+                  variants={menuItem}
+                  initial="hidden"
+                  animate="show"
+                  className="px-5 pb-8 pt-6"
+                >
+                  <div className="rounded-3xl border border-line/70 bg-white p-4 shadow-lg shadow-ink/5">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.24em] text-muted">
+                        <Sparkles size={11} className="text-gold" aria-hidden="true" />
+                        Visit the studio
+                      </span>
+                      <a
+                        href={BRAND.instagram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="D Sajawat on Instagram"
+                        className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-100 to-amber-200 text-gold shadow-sm shadow-amber-200/60 transition-transform hover:scale-105"
+                      >
+                        <Instagram size={16} aria-hidden="true" />
+                      </a>
+                    </div>
+
+                    <div className="mt-4 space-y-1.5">
+                      <p className="flex items-start gap-3 text-[12px] leading-relaxed text-ink/80">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-gold">
+                          <MapPin size={14} aria-hidden="true" />
+                        </span>
+                        <span className="pt-2">{BRAND.location}</span>
+                      </p>
+
+                      {BRAND.phones.map((phone) => (
+                        <a
+                          key={phone}
+                          href={`tel:${phone}`}
+                          className="flex min-h-[40px] items-center gap-3 text-[12px] font-medium text-ink"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-gold">
+                            <Phone size={14} aria-hidden="true" />
+                          </span>
+                          {phone}
+                        </a>
+                      ))}
+                    </div>
+
+                    <a
+                      href={`https://wa.me/${BRAND.whatsapp[0]}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-gold/25 bg-amber-50 px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.16em] text-gold transition-colors hover:border-gold hover:bg-amber-100"
+                    >
+                      <MessageCircle size={14} aria-hidden="true" />
+                      Chat on WhatsApp
+                    </a>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Drawer footer */}
+              <div className="relative shrink-0 border-t border-line/80 bg-gradient-to-r from-paper via-amber-50/50 to-paper px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-4">
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    onOpenQuote();
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-gold-bright px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink shadow-lg shadow-gold/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-ink hover:text-paper"
+                >
+                  Request a quote
+                  <ArrowUpRight size={14} aria-hidden="true" />
+                </button>
               </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
-    </>
-  );
-}
 
-// NavLink Component with Animated Underline
-function NavLink({
-  href,
-  children,
-  scrolled,
-  delay,
-  onClick
-}: {
-  href: string;
-  children: React.ReactNode;
-  scrolled: boolean;
-  delay: number;
-  onClick: () => void;
-}) {
-  return (
-    <motion.a
-      href={href}
-      className={`relative text-sm font-medium transition-colors py-1 ${
-        scrolled ? "text-gray-700" : "text-white/90"
-      }`}
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay }}
-      onClick={(e) => { e.preventDefault(); onClick(); }}
-      whileHover={{ y: -1 }}
-    >
-      <motion.span
-        className="relative inline-block"
-        whileHover={{ color: "#f59e0b" }}
-        transition={{ duration: 0.2 }}
+      {/* Mobile sticky actions */}
+      <div
+        className={`fixed inset-x-0 bottom-0 z-40 grid grid-cols-2 border-t border-line/80 bg-paper pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_30px_-18px_rgba(23,20,18,0.35)] transition-[transform,visibility] duration-300 lg:hidden ${
+          showMobileBar && !mobileOpen
+            ? "visible translate-y-0"
+            : "invisible translate-y-full"
+        }`}
       >
-        {children}
-      </motion.span>
-      {/* Animated Underline */}
-      <motion.span
-        className="absolute -bottom-1 left-0 right-0 h-0.5 bg-amber-400 rounded-full origin-left"
-        initial={{ scaleX: 0 }}
-        whileHover={{ scaleX: 1 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        style={{ transformOrigin: "left" }}
-      />
-    </motion.a>
+        <a
+          href={`tel:${BRAND.phones[0]}`}
+          className="flex items-center justify-center gap-2 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink"
+        >
+          <Phone size={14} className="text-gold" aria-hidden="true" />
+          Call
+        </a>
+        <a
+          href={`https://wa.me/${BRAND.whatsapp[0]}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 bg-gold-bright py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink"
+        >
+          WhatsApp
+          <ArrowUpRight size={14} aria-hidden="true" />
+        </a>
+      </div>
+    </>
   );
 }

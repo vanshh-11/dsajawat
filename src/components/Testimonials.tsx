@@ -1,20 +1,26 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TESTIMONIALS } from "../types";
-import { Quote, MapPin, Star, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, Quote, Sparkles, Star } from "lucide-react";
+import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
+
+const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export default function Testimonials() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const reduceMotion = usePrefersReducedMotion();
 
-  // Auto-play functionality
+  // Auto-play functionality — pauses on hover/focus and respects reduced motion
   useEffect(() => {
+    if (paused || reduceMotion) return;
     const timer = setInterval(() => {
       setDirection(1);
       setCurrentIndex((prev) => (prev + 1) % TESTIMONIALS.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, []);
+  }, [paused, reduceMotion]);
 
   const handlePrevious = () => {
     setDirection(-1);
@@ -27,264 +33,225 @@ export default function Testimonials() {
   };
 
   const variants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? 200 : -200,
+    enter: (dir: number) => ({
+      x: dir > 0 ? 48 : -48,
       opacity: 0,
-      scale: 0.9,
-      rotateY: direction > 0 ? 15 : -15,
+      scale: 0.99,
     }),
     center: {
       zIndex: 1,
       x: 0,
       opacity: 1,
       scale: 1,
-      rotateY: 0,
     },
-    exit: (direction: number) => ({
+    exit: (dir: number) => ({
       zIndex: 0,
-      x: direction < 0 ? 200 : -200,
+      x: dir < 0 ? 48 : -48,
       opacity: 0,
-      scale: 0.9,
-      rotateY: direction < 0 ? 15 : -15,
+      scale: 0.99,
     }),
   };
 
+  const active = TESTIMONIALS[currentIndex];
+
   return (
-    <section id="reviews" className="py-24 lg:py-32 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-white" />
+    <section
+      id="reviews"
+      aria-labelledby="reviews-title"
+      className="relative overflow-hidden border-b border-line bg-gradient-to-b from-amber-50/60 via-paper to-paper py-24 lg:py-32"
+    >
+      {/* Soft glows */}
       <motion.div
-        className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-amber-50/50 to-transparent"
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-24 top-10 h-80 w-80 rounded-full bg-amber-300/10 blur-3xl"
+        animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
+        transition={{ duration: 9, repeat: Infinity }}
+      />
+      <motion.div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-gold/5 blur-3xl"
+        animate={{ scale: [1.1, 1, 1.1], opacity: [0.4, 0.7, 0.4] }}
+        transition={{ duration: 11, repeat: Infinity }}
       />
 
-      {/* Decorative Elements */}
-      <motion.div
-        className="absolute top-20 left-20 w-16 h-16 text-amber-200"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-      >
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" />
-        </svg>
-      </motion.div>
-      <motion.div
-        className="absolute bottom-20 right-20 w-12 h-12 text-amber-300"
-        animate={{ rotate: -360 }}
-        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-      >
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" />
-        </svg>
-      </motion.div>
-
-      <div className="container mx-auto px-6 relative z-10">
+      <div className="container relative z-10">
         {/* Header */}
         <motion.div
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.7, ease }}
+          className="text-center"
         >
-          <motion.div
-            className="flex items-center justify-center gap-4 mb-8"
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-          >
-            <motion.div
-              className="h-px w-20 bg-gradient-to-r from-transparent to-amber-400"
-              initial={{ width: 0 }}
-              whileInView={{ width: 80 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3, duration: 0.8 }}
-            />
+          <div className="mb-7 flex items-center justify-center gap-4">
             <motion.span
-              className="text-sm font-bold tracking-[0.2em] uppercase text-amber-500 flex items-center gap-2"
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-            >
-              <Sparkles size={14} />
-              Testimonials
-            </motion.span>
-            <motion.div
-              className="h-px w-20 bg-gradient-to-l from-transparent to-amber-400"
+              aria-hidden="true"
               initial={{ width: 0 }}
               whileInView={{ width: 80 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.3, duration: 0.8 }}
+              transition={{ delay: 0.25, duration: 0.8 }}
+              className="hidden h-px bg-gradient-to-r from-transparent to-gold/70 sm:block"
             />
-          </motion.div>
+            <span className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.2em] text-gold md:text-[13px]">
+              <Sparkles size={14} aria-hidden="true" />
+              Client notes
+            </span>
+            <motion.span
+              aria-hidden="true"
+              initial={{ width: 0 }}
+              whileInView={{ width: 80 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.25, duration: 0.8 }}
+              className="hidden h-px bg-gradient-to-l from-transparent to-gold/70 sm:block"
+            />
+          </div>
 
-          <motion.h2
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900"
-            style={{ fontFamily: "Georgia, serif" }}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
+          <h2
+            id="reviews-title"
+            className="mx-auto max-w-4xl font-serif text-[clamp(2.25rem,5vw,4rem)] font-semibold leading-[1.05] tracking-[-0.01em] text-ink"
           >
-            What our clients <span className="text-amber-500">say</span>
-          </motion.h2>
+            What the trade <span className="italic text-gold">says</span>.
+          </h2>
+
+          <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-[1.85] text-muted md:text-[16px]">
+            Decorators, banquet halls and planners — in their own words.
+          </p>
         </motion.div>
 
         {/* Carousel */}
-        <div className="max-w-4xl mx-auto">
-          <div className="relative">
-            {/* Navigation Buttons */}
-            <motion.button
-              onClick={handlePrevious}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-16 z-20 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-600 hover:text-amber-500 hover:shadow-xl transition-all"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <ChevronLeft size={24} />
-            </motion.button>
-            <motion.button
-              onClick={handleNext}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-16 z-20 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-600 hover:text-amber-500 hover:shadow-xl transition-all"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <ChevronRight size={24} />
-            </motion.button>
+        <div
+          role="region"
+          aria-roledescription="carousel"
+          aria-label="Client testimonials"
+          className="mx-auto mt-12 max-w-4xl"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onFocusCapture={() => setPaused(true)}
+          onBlurCapture={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+              setPaused(false);
+            }
+          }}
+        >
+          <div className="relative min-h-[440px] sm:min-h-[400px] md:min-h-[380px]">
+            <AnimatePresence mode="wait" custom={direction} initial={false}>
+              <motion.div
+                key={currentIndex}
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.42, ease }}
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`${currentIndex + 1} of ${TESTIMONIALS.length}`}
+                className="absolute inset-0 flex items-center justify-center"
+              >
+                <article className="relative w-full overflow-hidden rounded-3xl border border-line/70 bg-white p-7 shadow-xl shadow-ink/5 md:p-10">
+                  <Quote
+                    aria-hidden="true"
+                    size={140}
+                    strokeWidth={1}
+                    className="pointer-events-none absolute -bottom-8 right-2 text-gold/[0.07]"
+                  />
 
-            {/* Testimonial Cards */}
-            <div className="relative h-[400px] md:h-[350px] overflow-hidden">
-              <AnimatePresence mode="wait" custom={direction}>
-                <motion.div
-                  key={currentIndex}
-                  custom={direction}
-                  variants={variants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{
-                    x: { type: "spring", stiffness: 300, damping: 30 },
-                    opacity: { duration: 0.3 },
-                    rotateY: { duration: 0.4 },
-                  }}
-                  className="absolute inset-0 flex items-center justify-center px-4"
-                >
-                  <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl p-8 md:p-10 shadow-xl shadow-gray-200/50 w-full max-w-3xl relative overflow-hidden">
-                    {/* Decorative Quote Background */}
-                    <motion.div
-                      className="absolute top-4 right-4 w-32 h-32 text-amber-100"
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.2 }}
-                    >
-                      <Quote size={120} />
-                    </motion.div>
-
-                    {/* Content */}
-                    <div className="relative z-10">
-                      {/* Quote Icon Badge */}
-                      <motion.div
-                        className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center mb-6 shadow-lg shadow-amber-200/50"
-                        initial={{ scale: 0, rotate: -180 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                      >
-                        <Quote size={28} className="text-amber-600" />
-                      </motion.div>
-
-                      {/* Stars */}
-                      <motion.div
-                        className="flex gap-1 mb-6"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                      >
-                        {[...Array(5)].map((_, j) => (
-                          <motion.div
-                            key={j}
-                            initial={{ scale: 0, rotate: -180 }}
-                            animate={{ scale: 1, rotate: 0 }}
-                            transition={{ delay: 0.2 + j * 0.1, type: "spring", stiffness: 200 }}
-                          >
-                            <Star size={20} className="text-amber-400 fill-amber-400" />
-                          </motion.div>
-                        ))}
-                      </motion.div>
-
-                      {/* Quote Text */}
-                      <motion.p
-                        className="text-lg md:text-xl text-gray-700 mb-8 italic leading-relaxed"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                      >
-                        &ldquo;{TESTIMONIALS[currentIndex].quote}&rdquo;
-                      </motion.p>
-
-                      {/* Author Info */}
-                      <motion.div
-                        className="flex items-center justify-between pt-6 border-t border-gray-100"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.4 }}
-                      >
-                        <div>
-                          <motion.h4
-                            className="font-bold text-gray-900 text-lg"
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.5 }}
-                          >
-                            {TESTIMONIALS[currentIndex].name}
-                          </motion.h4>
-                          <motion.p
-                            className="text-gray-500"
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.6 }}
-                          >
-                            {TESTIMONIALS[currentIndex].role}
-                          </motion.p>
-                        </div>
-                        <motion.div
-                          className="flex items-center gap-2 px-4 py-2 bg-amber-50 rounded-full"
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.5 }}
-                        >
-                          <MapPin size={16} className="text-amber-500" />
-                          <span className="text-sm font-medium text-amber-700">
-                            {TESTIMONIALS[currentIndex].city}
-                          </span>
-                        </motion.div>
-                      </motion.div>
+                  <div className="relative z-10">
+                    <div className="flex items-start justify-between gap-4">
+                      <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200 text-gold shadow-md shadow-amber-200/50">
+                        <Quote size={22} strokeWidth={1.5} aria-hidden="true" />
+                      </span>
+                      <span aria-hidden="true" className="font-serif text-[12px] italic text-muted">
+                        {String(currentIndex + 1).padStart(2, "0")} /{" "}
+                        {String(TESTIMONIALS.length).padStart(2, "0")}
+                      </span>
                     </div>
 
-                    {/* Decorative Gradient */}
-                    <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400" />
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
+                    <div className="mt-5 flex items-center gap-1" aria-label="Rated 5 out of 5">
+                      {[...Array(5)].map((_, j) => (
+                        <Star
+                          key={j}
+                          size={15}
+                          aria-hidden="true"
+                          className="fill-gold-bright text-gold-bright"
+                        />
+                      ))}
+                    </div>
 
-            {/* Dots Indicator */}
-            <div className="flex justify-center gap-3 mt-8">
+                    <blockquote className="mt-4">
+                      <p className="font-serif text-[21px] leading-[1.5] text-ink md:text-[25px]">
+                        &ldquo;{active.quote}&rdquo;
+                      </p>
+                    </blockquote>
+
+                    <div className="mt-6 flex flex-col gap-4 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="font-serif text-[19px] font-semibold leading-tight text-ink md:text-[20px]">
+                          {active.name}
+                        </p>
+                        <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.16em] text-muted">
+                          {active.role}
+                        </p>
+                      </div>
+                      <span className="inline-flex w-fit items-center gap-2 rounded-full border border-gold/20 bg-amber-50 px-3.5 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-gold">
+                        <MapPin size={12} aria-hidden="true" />
+                        {active.city}
+                      </span>
+                    </div>
+                  </div>
+
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-amber-300 via-amber-500 to-amber-300"
+                  />
+                </article>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Controls */}
+          <div className="mt-8 flex items-center justify-center gap-5">
+            <button
+              type="button"
+              onClick={handlePrevious}
+              aria-label="Previous testimonial"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white text-ink shadow-sm shadow-ink/5 transition-colors duration-300 hover:border-gold/40 hover:text-gold"
+            >
+              <ChevronLeft size={19} aria-hidden="true" />
+            </button>
+
+            <div className="flex items-center gap-1">
               {TESTIMONIALS.map((_, i) => (
-                <motion.button
+                <button
                   key={i}
+                  type="button"
                   onClick={() => {
                     setDirection(i > currentIndex ? 1 : -1);
                     setCurrentIndex(i);
                   }}
-                  className={`w-3 h-3 rounded-full transition-all ${
-                    i === currentIndex ? "bg-amber-500 w-10" : "bg-gray-300 hover:bg-gray-400"
-                  }`}
-                  whileHover={{ scale: 1.2 }}
-                  whileTap={{ scale: 0.9 }}
                   aria-label={`Go to testimonial ${i + 1}`}
-                />
+                  aria-pressed={i === currentIndex}
+                  className="group flex h-6 min-w-[24px] items-center justify-center px-1"
+                >
+                  <span
+                    className={`block h-2 rounded-full transition-all duration-300 ${
+                      i === currentIndex
+                        ? "w-8 bg-gold"
+                        : "w-2 bg-line group-hover:bg-gold/50"
+                    }`}
+                  />
+                </button>
               ))}
             </div>
+
+            <button
+              type="button"
+              onClick={handleNext}
+              aria-label="Next testimonial"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white text-ink shadow-sm shadow-ink/5 transition-colors duration-300 hover:border-gold/40 hover:text-gold"
+            >
+              <ChevronRight size={19} aria-hidden="true" />
+            </button>
           </div>
         </div>
       </div>

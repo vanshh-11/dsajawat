@@ -1,203 +1,275 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { ArrowUpRight, GripVertical } from "lucide-react";
 
 const transformations = [
   {
-    before: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=600&h=400&fit=crop",
-    after: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&h=400&fit=crop",
-    title: "Wedding Venue Transformation",
-    desc: "From ordinary ballroom to breathtaking celebration space",
+    before: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1600&h=1000&fit=crop&q=75&auto=format",
+    after: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=1600&h=1000&fit=crop&q=75&auto=format",
+    title: "Wedding venue transformation",
+    short: "The venue",
+    desc: "An ordinary ballroom, dressed into a full celebration space.",
   },
   {
-    before: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&h=400&fit=crop",
-    after: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=600&h=400&fit=crop",
-    title: "Table Setting Elegance",
-    desc: "Simple tables transformed into luxurious dining experiences",
+    before: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1600&h=1000&fit=crop&q=75&auto=format",
+    after: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1600&h=1000&fit=crop&q=75&auto=format",
+    title: "Table setting elegance",
+    short: "The table",
+    desc: "Simple tables finished into a considered dining setting.",
   },
   {
-    before: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600&h=400&fit=crop",
-    after: "https://images.unsplash.com/photo-1529636798458-92182e662485?w=600&h=400&fit=crop",
-    title: "Stage Decoration Magic",
-    desc: "Bare stage converted into a stunning focal point",
+    before: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=1600&h=1000&fit=crop&q=75&auto=format",
+    after: "https://images.unsplash.com/photo-1529636798458-92182e662485?w=1600&h=1000&fit=crop&q=75&auto=format",
+    title: "Stage decoration",
+    short: "The stage",
+    desc: "A bare stage turned into the room's focal point.",
   },
 ];
 
-export default function BeforeAfter() {
-  return (
-    <section className="py-24 lg:py-32 relative overflow-hidden bg-gradient-to-b from-white to-amber-50/30">
-      {/* Background Decorative Elements */}
-      <motion.div
-        className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-amber-50/50 to-transparent"
-      />
+const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
-      <div className="container mx-auto px-6 relative z-10">
+export default function BeforeAfter() {
+  const [active, setActive] = useState(0);
+  const [position, setPosition] = useState(50);
+  const frameRef = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
+
+  const item = transformations[active];
+
+  useEffect(() => {
+    setPosition(50);
+  }, [active]);
+
+  useEffect(() => {
+    transformations.forEach((entry) => {
+      [entry.before, entry.after].forEach((src) => {
+        const img = new Image();
+        img.src = src;
+      });
+    });
+  }, []);
+
+  const updateFromClientX = (clientX: number) => {
+    const el = frameRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const next = ((clientX - rect.left) / rect.width) * 100;
+    setPosition(Math.min(100, Math.max(0, next)));
+  };
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLButtonElement>) => {
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragging.current = true;
+    updateFromClientX(event.clientX);
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (!dragging.current) return;
+    updateFromClientX(event.clientX);
+  };
+
+  const handlePointerEnd = (event: React.PointerEvent<HTMLButtonElement>) => {
+    dragging.current = false;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
+
+  return (
+    <section
+      id="work"
+      className="relative overflow-hidden border-b border-line bg-paper py-20 md:py-28 lg:py-32"
+    >
+      <div className="mx-auto max-w-content px-5 md:px-10">
         {/* Header */}
         <motion.div
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.7, ease }}
+          className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end"
         >
-          <motion.div
-            className="flex items-center justify-center gap-4 mb-8"
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-          >
-            <motion.div
-              className="h-px w-20 bg-gradient-to-r from-transparent to-amber-400"
-              initial={{ width: 0 }}
-              whileInView={{ width: 80 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3, duration: 0.8 }}
-            />
-            <motion.span
-              className="text-sm font-bold tracking-[0.2em] uppercase text-amber-500 flex items-center gap-2"
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-            >
-              <Sparkles size={14} />
-              Our Work
-            </motion.span>
-            <motion.div
-              className="h-px w-20 bg-gradient-to-l from-transparent to-amber-400"
-              initial={{ width: 0 }}
-              whileInView={{ width: 80 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3, duration: 0.8 }}
-            />
-          </motion.div>
+          <div>
+            <div className="flex items-center gap-4">
+              <span aria-hidden="true" className="h-px w-8 bg-gold md:w-10" />
+              <span className="text-[10px] font-medium uppercase tracking-[0.24em] text-gold md:text-[11px]">
+                Our work
+              </span>
+              <span aria-hidden="true" className="text-[10px] font-medium tracking-[0.2em] text-muted">
+                03
+              </span>
+            </div>
 
-          <motion.h2
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900"
-            style={{ fontFamily: "Georgia, serif" }}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-          >
-            See the <span className="text-amber-500">Transformation</span>
-          </motion.h2>
+            <h2 className="mt-7 font-serif text-[clamp(2.1rem,4.4vw,4rem)] font-light leading-[1.04] tracking-[-0.015em] text-ink">
+              See the <span className="italic text-gold">transformation</span>.
+            </h2>
+          </div>
 
-          <motion.p
-            className="mt-6 text-lg text-gray-500 max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4 }}
-          >
-            Witness the magic of our fabrics and decorations - before and after comparisons
-          </motion.p>
+          <p className="max-w-[42ch] text-[15px] leading-[1.85] text-muted lg:pb-2 lg:justify-self-end">
+            Real installations, photographed on site. Drag the handle to move between
+            the room as found and the room as finished.
+          </p>
         </motion.div>
 
-        {/* Transformation Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {transformations.map((item, i) => (
-            <motion.div
-              key={i}
-              className="group bg-white rounded-3xl overflow-hidden shadow-xl shadow-gray-200/50"
-              initial={{ opacity: 0, y: 60, scale: 0.95 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{
-                delay: i * 0.15,
-                duration: 0.7,
-                ease: [0.25, 0.46, 0.45, 0.94]
-              }}
-              whileHover={{
-                y: -10,
-                boxShadow: "0 30px 60px rgba(0,0,0,0.15)",
-              }}
-            >
-              {/* Before/After Image Container */}
-              <div className="relative aspect-[4/3] overflow-hidden">
-                {/* Before Image */}
-                <div className="absolute inset-0">
-                  <img
-                    src={item.before}
-                    alt="Before"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-4 left-4 px-4 py-2 bg-black/60 backdrop-blur-sm rounded-full text-white text-sm font-semibold">
-                    Before
-                  </div>
-                </div>
-
-                {/* After Image with Slider Effect */}
-                <div className="absolute inset-0 overflow-hidden" style={{ clipPath: "inset(0 50% 0 0)" }}>
-                  <img
-                    src={item.after}
-                    alt="After"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-4 right-4 px-4 py-2 bg-amber-500/90 backdrop-blur-sm rounded-full text-white text-sm font-semibold">
-                    After
-                  </div>
-                </div>
-
-                {/* Slider Handle */}
-                <div
-                  className="absolute top-0 bottom-0 w-1 bg-white cursor-ew-resize"
-                  style={{ left: "50%", transform: "translateX(-50%)" }}
+        {/* Project selector */}
+        <div className="mt-10 grid grid-cols-1 border-t border-line sm:grid-cols-3 md:mt-12">
+          {transformations.map((entry, index) => {
+            const isActive = index === active;
+            return (
+              <button
+                key={entry.title}
+                type="button"
+                onClick={() => setActive(index)}
+                aria-pressed={isActive}
+                className={`relative flex items-baseline gap-3 border-b border-line px-1 py-4 text-left transition-colors duration-300 sm:border-b-0 sm:border-r sm:px-5 sm:last:border-r-0 ${
+                  isActive ? "text-ink" : "text-muted hover:text-ink"
+                }`}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`font-serif text-[12px] italic transition-colors duration-300 ${
+                    isActive ? "text-gold" : "text-muted"
+                  }`}
                 >
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center">
-                    <div className="flex gap-1">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="text-gray-400">
-                        <path d="M15 18l-6-6 6-6"/>
-                      </svg>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="text-gray-400">
-                        <path d="M9 18l6-6-6-6"/>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-              </div>
-
-              {/* Content */}
-              <div className="p-6">
-                <h3
-                  className="text-xl font-bold text-gray-900 mb-2"
-                  style={{ fontFamily: "Georgia, serif" }}
-                >
-                  {item.title}
-                </h3>
-                <p className="text-gray-500 text-sm">
-                  {item.desc}
-                </p>
-              </div>
-            </motion.div>
-          ))}
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span className="text-[10px] font-medium uppercase tracking-[0.18em]">
+                  {entry.short}
+                </span>
+                <span
+                  aria-hidden="true"
+                  className={`absolute inset-x-0 bottom-0 h-[2px] origin-left bg-gold transition-transform duration-300 ${
+                    isActive ? "scale-x-100" : "scale-x-0"
+                  }`}
+                />
+              </button>
+            );
+          })}
         </div>
 
-        {/* CTA */}
+        {/* Comparison frame */}
         <motion.div
-          className="text-center mt-16"
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.5 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.7, delay: 0.1, ease }}
+          className="mt-8"
         >
-          <motion.a
-            href="#contact"
-            className="inline-flex items-center gap-3 px-10 py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-white font-bold rounded-full shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 transition-all"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+          <div
+            ref={frameRef}
+            onClick={(event) => {
+              if ((event.target as HTMLElement).closest("button")) return;
+              updateFromClientX(event.clientX);
             }}
+            className="relative aspect-[4/3] w-full select-none overflow-hidden rounded-sm border border-line bg-ink/5 md:aspect-[16/9]"
+            style={{ touchAction: "pan-y" }}
           >
-            <Sparkles size={20} />
-            <span>Transform Your Event</span>
-          </motion.a>
+            <img
+              src={item.before}
+              alt={`${item.title} — before`}
+              className="absolute inset-0 h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
+              draggable={false}
+            />
+
+            <div
+              className="absolute inset-0"
+              style={{ clipPath: `inset(0 0 0 ${position}%)` }}
+            >
+              <img
+                src={item.after}
+                alt={`${item.title} — after`}
+                className="h-full w-full object-cover"
+                loading="lazy"
+                decoding="async"
+                draggable={false}
+              />
+            </div>
+
+            <span className="pointer-events-none absolute bottom-4 left-4 rounded-full border border-paper/25 bg-ink/35 px-3.5 py-1.5 text-[9px] font-medium uppercase tracking-[0.22em] text-paper backdrop-blur-sm">
+              Before
+            </span>
+            <span className="pointer-events-none absolute bottom-4 right-4 rounded-full border border-paper/25 bg-ink/35 px-3.5 py-1.5 text-[9px] font-medium uppercase tracking-[0.22em] text-paper backdrop-blur-sm">
+              After
+            </span>
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 z-10 w-px bg-paper/80"
+              style={{ left: `${position}%` }}
+            />
+
+            <button
+              type="button"
+              role="slider"
+              aria-label="Compare before and after"
+              aria-orientation="horizontal"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(position)}
+              aria-valuetext={`${Math.round(position)}% before`}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerEnd}
+              onPointerCancel={handlePointerEnd}
+              onKeyDown={(event) => {
+                if (event.key === "ArrowLeft") {
+                  event.preventDefault();
+                  setPosition((value) => Math.max(0, value - 2));
+                } else if (event.key === "ArrowRight") {
+                  event.preventDefault();
+                  setPosition((value) => Math.min(100, value + 2));
+                } else if (event.key === "Home") {
+                  event.preventDefault();
+                  setPosition(0);
+                } else if (event.key === "End") {
+                  event.preventDefault();
+                  setPosition(100);
+                }
+              }}
+              className="absolute top-1/2 z-20 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize items-center justify-center rounded-full border border-line bg-paper text-ink shadow-[0_4px_18px_rgba(23,20,18,0.18)]"
+              style={{ left: `${position}%`, touchAction: "none" }}
+            >
+              <GripVertical size={17} strokeWidth={1.5} />
+            </button>
+          </div>
+
+          {/* Caption */}
+          <div
+            aria-live="polite"
+            className="mt-6 flex flex-col gap-5 md:flex-row md:items-end md:justify-between"
+          >
+            <div>
+              <h3 className="font-serif text-[26px] font-light leading-tight text-ink md:text-[30px]">
+                {item.title}
+              </h3>
+              <p className="mt-1.5 max-w-[52ch] text-[14px] leading-relaxed text-muted">
+                {item.desc}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+              <span className="flex items-center gap-2 text-[9px] font-medium uppercase tracking-[0.18em] text-muted">
+                <GripVertical size={12} className="text-gold" aria-hidden="true" />
+                Drag to compare
+              </span>
+              <a
+                href="#contact"
+                onClick={(event) => {
+                  event.preventDefault();
+                  document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-gold-bright px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink transition-colors duration-300 hover:bg-ink hover:text-paper"
+              >
+                Start your project
+                <ArrowUpRight
+                  size={14}
+                  className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                />
+              </a>
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>

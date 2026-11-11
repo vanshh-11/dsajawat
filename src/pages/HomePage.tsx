@@ -10,12 +10,14 @@ import Footer from "../components/Footer";
 export default function HomePage({ onOpenQuote }: { onOpenQuote: () => void }) {
   return (
     <>
-      <HeroScroll onOpenQuote={onOpenQuote} />
-      <About />
-      <Features />
-      <BeforeAfter />
-      <Testimonials />
-      <Contact />
+      <main id="main-content">
+        <HeroScroll onOpenQuote={onOpenQuote} />
+        <About />
+        <Features />
+        <BeforeAfter />
+        <Testimonials />
+        <Contact />
+      </main>
       <Footer />
     </>
   );

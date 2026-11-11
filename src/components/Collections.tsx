@@ -1,8 +1,8 @@
-import React, { useRef, useEffect, useState } from "react";
-import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
+import React, { useEffect, useState } from "react";
+import { motion, type Variants } from "framer-motion";
 import { COLLECTIONS, Collection } from "../types";
 import { useProducts, Product } from "../hooks/useProducts";
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 
 interface UnifiedCollection {
   id: string;
@@ -33,149 +33,95 @@ function toUnifiedCollection(item: Product | Collection, isFromApi: boolean): Un
   };
 }
 
+const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+const grid: Variants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06, delayChildren: 0.05 },
+  },
+};
+
+const card: Variants = {
+  hidden: { opacity: 0, y: 22 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease } },
+};
+
 interface CollectionCardProps {
   collection: UnifiedCollection;
-  index: number;
 }
 
-function CollectionCard({ collection, index }: CollectionCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-
-  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
-  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
-
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["7deg", "-7deg"]);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-7deg", "7deg"]);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = cardRef.current?.getBoundingClientRect();
-    if (rect) {
-      const width = rect.width;
-      const height = rect.height;
-      const mouseX = (e.clientX - rect.left) / width - 0.5;
-      const mouseY = (e.clientY - rect.top) / height - 0.5;
-      x.set(mouseX);
-      y.set(mouseY);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    x.set(0);
-    y.set(0);
-  };
-
+function CollectionCard({ collection }: CollectionCardProps) {
   const { image, title, overline, desc } = collection;
 
   return (
-    <motion.div
-      ref={cardRef}
-      className="group relative overflow-hidden rounded-3xl cursor-pointer"
-      initial={{ opacity: 0, y: 60, scale: 0.9 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{
-        delay: index * 0.08,
-        duration: 0.6,
-        ease: [0.25, 0.46, 0.45, 0.94]
-      }}
-      style={{
-        rotateX,
-        rotateY,
-        transformStyle: "preserve-3d",
-        perspective: 1000,
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      whileHover={{ scale: 1.03 }}
+    <motion.article
+      variants={card}
+      className="group relative overflow-hidden rounded-3xl border border-line/70 bg-white p-2.5 shadow-lg shadow-ink/5 transition-shadow duration-300 hover:shadow-xl"
     >
-      <div
-        className="relative aspect-[4/5] overflow-hidden"
-        style={{ transform: "translateZ(30px)" }}
-      >
-        <motion.img
+      <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-line">
+        <img
           src={image}
           alt={title}
-          className="absolute inset-0 w-full h-full object-cover"
-          animate={{ scale: [1, 1.1] }}
-          transition={{ duration: 0.8, delay: index * 0.1 }}
-          whileHover={{ scale: 1.15 }}
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
-
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
 
         <div
-          className="absolute inset-0 flex flex-col justify-end p-6"
-          style={{ transform: "translateZ(60px)" }}
-        >
-          <motion.span
-            className="inline-block px-3 py-1 bg-amber-400/90 text-white text-xs font-bold uppercase tracking-wider rounded-full mb-3 w-fit"
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.1 + 0.3 }}
-            whileHover={{ scale: 1.05, backgroundColor: "#f59e0b" }}
-          >
-            {overline}
-          </motion.span>
-
-          <motion.h3
-            className="text-xl lg:text-2xl font-bold text-white mb-3"
-            style={{ fontFamily: "Georgia, serif" }}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.1 + 0.4 }}
-          >
-            {title}
-          </motion.h3>
-
-          <motion.p
-            className="text-sm text-white/80 mb-4 line-clamp-2"
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.1 + 0.5 }}
-          >
-            {desc}
-          </motion.p>
-
-          <motion.div
-            className="flex items-center gap-2 text-amber-400 font-semibold"
-            initial={{ opacity: 0, x: -10 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.1 + 0.6 }}
-          >
-            <span className="text-sm">View Details</span>
-            <motion.div
-              animate={{ x: [0, 5, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
-              <ArrowRight size={16} />
-            </motion.div>
-          </motion.div>
-        </div>
-
-        <motion.div
-          className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-          style={{
-            boxShadow: "inset 0 0 0 2px rgba(212, 175, 55, 0.6)",
-            transform: "translateZ(70px)"
-          }}
-          animate={{
-            boxShadow: [
-              "inset 0 0 0 2px rgba(212, 175, 55, 0.3)",
-              "inset 0 0 0 2px rgba(212, 175, 55, 0.6)",
-              "inset 0 0 0 2px rgba(212, 175, 55, 0.3)"
-            ]
-          }}
-          transition={{ duration: 2, repeat: Infinity }}
+          aria-hidden="true"
+          className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/25 to-transparent"
         />
+
+        <span className="absolute left-3 top-3 rounded-full border border-paper/30 bg-ink/30 px-2.5 py-1 text-[8px] font-semibold uppercase tracking-[0.2em] text-paper backdrop-blur-sm">
+          {overline}
+        </span>
+
+        <div className="absolute inset-x-0 bottom-0 p-5">
+          <p className="flex items-center gap-1.5 text-[8px] font-semibold uppercase tracking-[0.24em] text-gold-bright">
+            <Sparkles size={9} aria-hidden="true" />
+            The collection
+          </p>
+          <h3 className="mt-2 font-serif text-[22px] font-semibold leading-tight text-paper">
+            {title}
+          </h3>
+          <p className="mt-2 line-clamp-2 text-[12px] leading-relaxed text-paper/70">
+            {desc}
+          </p>
+        </div>
       </div>
-    </motion.div>
+
+      <div className="flex items-center justify-between gap-3 px-2 pb-1 pt-3">
+        <span className="text-[8px] font-semibold uppercase tracking-[0.22em] text-muted">
+          Hand-finished · Ludhiana
+        </span>
+        <span
+          aria-hidden="true"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-100 to-amber-200 text-gold shadow-sm shadow-amber-200/60 transition-transform duration-300 group-hover:scale-105"
+        >
+          <ArrowUpRight size={13} />
+        </span>
+      </div>
+
+      <span
+        aria-hidden="true"
+        className="mx-2 mb-1 mt-2 block h-1 rounded-full bg-gradient-to-r from-amber-300 via-amber-500 to-amber-300 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+      />
+    </motion.article>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div className="rounded-3xl border border-line/70 bg-white p-2.5 shadow-sm shadow-ink/5">
+      <div className="aspect-[4/5] animate-pulse rounded-2xl bg-line/70" />
+      <div className="flex items-center justify-between px-2 pb-1 pt-3">
+        <div className="h-2.5 w-24 animate-pulse rounded-full bg-line/70" />
+        <div className="h-8 w-8 animate-pulse rounded-full bg-line/60" />
+      </div>
+      <div className="mx-2 mb-1 mt-2 h-1 rounded-full bg-line/50" />
+    </div>
   );
 }
 
@@ -194,86 +140,62 @@ export default function Collections() {
     : COLLECTIONS.map((c) => toUnifiedCollection(c, false));
 
   return (
-    <section id="collections" className="py-24 lg:py-32 bg-white relative overflow-hidden">
-      <div className="absolute top-20 left-10 w-64 h-64 bg-amber-400/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 right-10 w-80 h-80 bg-amber-400/5 rounded-full blur-3xl" />
+    <section
+      id="collections"
+      className="relative overflow-hidden border-b border-line bg-paper py-20 lg:py-24"
+    >
+      <motion.div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-24 top-16 h-80 w-80 rounded-full bg-amber-300/10 blur-3xl"
+        animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+        transition={{ duration: 10, repeat: Infinity }}
+      />
+      <motion.div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-gold/5 blur-3xl"
+        animate={{ scale: [1.1, 1, 1.1], opacity: [0.4, 0.7, 0.4] }}
+        transition={{ duration: 12, repeat: Infinity }}
+      />
 
-      <div className="container mx-auto px-6 relative z-10">
-        <motion.div
-          className="text-center mb-20"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-        >
-          <motion.div
-            className="flex items-center justify-center gap-4 mb-8"
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-          >
-            <motion.div
-              className="h-px w-16 bg-gradient-to-r from-transparent to-amber-400"
-              initial={{ width: 0 }}
-              whileInView={{ width: 64 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-            />
-            <motion.span
-              className="text-sm font-bold tracking-[0.2em] uppercase text-amber-500"
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-            >
-              Our Products
-            </motion.span>
-            <motion.div
-              className="h-px w-16 bg-gradient-to-l from-transparent to-amber-400"
-              initial={{ width: 0 }}
-              whileInView={{ width: 64 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-            />
-          </motion.div>
-
-          <motion.h2
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900"
-            style={{ fontFamily: "Georgia, serif" }}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4 }}
-          >
-            Shop by <span className="text-amber-500">Category</span>
-          </motion.h2>
-
-          <motion.p
-            className="mt-6 text-lg text-gray-500 max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.5 }}
-          >
-            Discover our curated collection of premium fabrics and event essentials
-          </motion.p>
-        </motion.div>
+      <div className="container relative z-10">
+        {/* Archive toolbar */}
+        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
+          <div>
+            <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
+              <Sparkles size={12} aria-hidden="true" />
+              The archive
+            </p>
+            <h2 className="mt-2 font-serif text-[22px] italic leading-snug text-ink">
+              Eight series, one standard.
+            </h2>
+          </div>
+          <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-muted">
+            {isLoading
+              ? "Loading the archive"
+              : `${String(unifiedCollections.length).padStart(2, "0")} series`}
+          </p>
+        </div>
 
         {isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="aspect-[4/5] rounded-3xl bg-gray-100 animate-pulse" />
+          <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-5 lg:grid-cols-3 lg:gap-6 xl:grid-cols-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <SkeletonCard key={i} />
             ))}
           </div>
         )}
 
         {!isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {unifiedCollections.map((collection, i) => (
-              <CollectionCard key={collection.id} collection={collection} index={i} />
+          <motion.div
+            variants={grid}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-60px" }}
+            className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-5 lg:grid-cols-3 lg:gap-6 xl:grid-cols-4"
+          >
+            {unifiedCollections.map((collection) => (
+              <CollectionCard key={collection.id} collection={collection} />
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
     </section>

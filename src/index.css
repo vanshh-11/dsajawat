@@ -10,18 +10,47 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body { font-family: system-ui, -apple-system, sans-serif; color: var(--dark); background: #fdf6eb; line-height: 1.6; overflow-x: hidden; }
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+body { font-family: Inter, system-ui, -apple-system, sans-serif; color: #171412; background: #FAF7F2; line-height: 1.6; overflow-x: hidden; }
+
+section[id] { scroll-margin-top: 88px; }
+[id="main-content"] { scroll-margin-top: 88px; }
+
+/* Balance display type, avoid orphans in body copy */
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }
+
+/* Two-tone ring stays visible on both paper and ink surfaces */
+:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #FAF7F2, 0 0 0 4px #171412;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar { width: 10px; }
-::-webkit-scrollbar-track { background: #fdf6eb; }
-::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #d4af37, #c9a032); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #f4d47c, #d4af37); }
+::-webkit-scrollbar-track { background: #F2ECE3; }
+::-webkit-scrollbar-thumb { background: #8A6500; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #6E5000; }
 
 /* Selection Color */
-::selection { background: #d4af37; color: white; }
-::-moz-selection { background: #d4af37; color: white; }
+::selection { background: #C9A227; color: #171412; }
+::-moz-selection { background: #C9A227; color: #171412; }
 
 /* Override all white backgrounds with warm cream */
 .bg-white { background-color: #fdf6eb !important; }
@@ -34,8 +63,8 @@ body { font-family: system-ui, -apple-system, sans-serif; color: var(--dark); ba
 @media (min-width: 768px) { .section { padding: 100px 0; } }
 @media (min-width: 1024px) { .section { padding: 120px 0; } }
 
-.container { width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 24px; }
-@media (min-width: 768px) { .container { padding: 0 32px; } }
+.container { width: 100%; max-width: 1280px; margin: 0 auto; padding-left: 24px; padding-right: 24px; }
+@media (min-width: 768px) { .container { padding-left: 32px; padding-right: 32px; } }
 
 .section-overline { font-size: 12px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); }
 .section-title { font-family: Georgia, serif; font-size: clamp(28px, 5vw, 44px); font-weight: 700; line-height: 1.2; color: var(--dark); }
